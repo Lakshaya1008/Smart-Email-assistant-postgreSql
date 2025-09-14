@@ -1,0 +1,26 @@
+﻿# Node
+node_modules/
+
+# Local envs
+*.env
+*.env.local
+*.env.*.local
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Java / Maven
+target/
+*.log
+*.jar
+
+# Build artifacts
+build/
+dist/
+
+# other
+npm-debug.log
+yarn-error.log
