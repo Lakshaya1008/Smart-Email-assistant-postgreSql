@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://your-deployed-backend-url.com');
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
 
 // API Endpoints
 export const API_ENDPOINTS = {
