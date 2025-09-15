@@ -26,7 +26,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
   };
 
   // Helper function to truncate text
-  const truncateText = (text, maxLength = 200) => {
+  const truncateText = (text, maxLength = 150) => {
     if (!text || text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
@@ -72,32 +72,46 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
     <div className="email-replies">
       {/* Email Summary Section */}
       {replies.summary && (
-        <div className="email-summary-section">
-          <div className="summary-header">
-            <h3 className="summary-title">
+        <div className="reply-card summary-card fade-in">
+          <div className="reply-header">
+            <h3 className="reply-number">
               <i className="fas fa-file-alt"></i>
               Email Summary
             </h3>
-            <button
-              onClick={handleCopySummary}
-              className="btn btn-outline btn-small summary-copy-btn"
-              title="Copy summary to clipboard"
-            >
-              <i className="fas fa-copy"></i>
-              Copy
-            </button>
+            <div className="reply-actions">
+              <button
+                onClick={handleCopySummary}
+                className="action-btn"
+                title="Copy summary to clipboard"
+              >
+                <i className="fas fa-copy"></i>
+              </button>
+              {replies.summary && replies.summary.length > 150 && (
+                <button
+                  onClick={toggleSummaryExpanded}
+                  className="action-btn"
+                  title={summaryExpanded ? 'Show less' : 'Read more'}
+                >
+                  <i className={summaryExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}></i>
+                </button>
+              )}
+            </div>
           </div>
-          <div className="summary-content">
-            <p className={summaryExpanded ? 'summary-text-expanded' : 'summary-text-collapsed'}>
-              {summaryExpanded ? replies.summary : truncateText(replies.summary, 200)}
+          <div className="reply-content">
+            <p className={`reply-text ${summaryExpanded ? 'summary-expanded' : 'summary-collapsed'}`}>
+              {summaryExpanded ? replies.summary : truncateText(replies.summary, 150)}
             </p>
-            {replies.summary && replies.summary.length > 200 && (
+          </div>
+          <div className="reply-footer">
+            <div className="reply-stats">
+              <span className="reply-length">{replies.summary.split(' ').length} words</span>
+              <span className="reply-chars">{replies.summary.length} characters</span>
+            </div>
+            {replies.summary && replies.summary.length > 150 && (
               <button
                 onClick={toggleSummaryExpanded}
-                className="btn btn-outline btn-small read-more-btn"
-                style={{ marginTop: '12px' }}
+                className="btn btn-outline btn-small"
               >
-                <i className={summaryExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}></i>
                 {summaryExpanded ? 'Show Less' : 'Read More'}
               </button>
             )}
