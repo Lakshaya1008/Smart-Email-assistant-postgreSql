@@ -14,18 +14,34 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = getStoredToken();
         if (token) {
-          // Test if token is still valid
-          await authService.testAuth();
-          // If test passes, get user info from token payload
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          setUser({
-            username: payload.sub,
-            token: token
-          });
+          // Validate token format before proceeding
+          if (typeof token !== 'string' || token.split('.').length !== 3) {
+            throw new Error('Invalid token format');
+          }
+          
+          // Test if token is still valid with backend
+          const response = await authService.testAuth();
+          
+          // Parse JWT payload safely
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload && payload.sub) {
+              setUser({
+                username: payload.sub,
+                token: token
+              });
+            } else {
+              throw new Error('Invalid token payload');
+            }
+          } catch (parseError) {
+            console.error('Token parsing failed:', parseError);
+            throw parseError; // Re-throw to trigger cleanup
+          }
         }
       } catch (error) {
         console.error('Auth initialization failed:', error);
         removeStoredToken();
+        setUser(null); // Explicitly set user to null if validation fails
       } finally {
         setLoading(false);
       }
@@ -69,8 +85,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    removeStoredToken();
-    setUser(null);
+    try {
+      removeStoredToken();
+      setUser(null);
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force clear user state even if token removal fails
+      setUser(null);
+    }
   };
 
   const value = {

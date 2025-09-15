@@ -58,7 +58,7 @@ const EmailForm = ({ onGenerate, loading }) => {
     } else if (formData.emailContent.trim().length < 10) {
       newErrors.emailContent = 'Email content should be at least 10 characters';
     } else if (formData.emailContent.trim().length > 2000) {
-      newErrors.emailContent = 'Email content too long (max 2000 characters to stay within API limits)';
+      newErrors.emailContent = 'Email content too long (max 2000 characters)';
     }
 
     setErrors(newErrors);
@@ -219,15 +219,8 @@ const EmailForm = ({ onGenerate, loading }) => {
           )}
           <div className="form-hint">
             <i className="fas fa-info-circle"></i>
-            Keep content under 2000 characters to stay within API token limits
+            Keep content under 2000 characters
           </div>
-          {/* Token Estimation */}
-          {formData.emailContent && (
-            <div className="token-estimate">
-              <i className="fas fa-calculator"></i>
-              Estimated tokens: ~{rateLimiter.estimateTokens(formData.emailContent + formData.subject)}
-            </div>
-          )}
         </div>
 
         <div className="form-row">

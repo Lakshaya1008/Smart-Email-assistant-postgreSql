@@ -46,9 +46,14 @@ class AuthService {
   // Test authentication
   async testAuth() {
     try {
-      return await apiService.get(API_ENDPOINTS.AUTH.TEST);
+      // Add timeout to prevent hanging requests
+      return await apiService.get(API_ENDPOINTS.AUTH.TEST, {}, { 
+        includeAuth: true,
+        timeout: 10000 // 10 second timeout
+      });
     } catch (error) {
-      throw new Error('Authentication test failed');
+      console.error('Authentication test failed:', error.message || error);
+      throw new Error('Authentication test failed: ' + (error.message || 'Unknown error'));
     }
   }
 }
