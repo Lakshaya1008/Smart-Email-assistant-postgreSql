@@ -10,6 +10,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
   const { showSuccess, showError } = useNotification();
   const [savingIndex, setSavingIndex] = useState(null);
   const [expandedReply, setExpandedReply] = useState(null);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   const handleCopySummary = async () => {
     try {
@@ -18,6 +19,16 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
     } catch (error) {
       showError('Failed to copy summary to clipboard');
     }
+  };
+
+  const toggleSummaryExpanded = () => {
+    setSummaryExpanded(prev => !prev);
+  };
+
+  // Helper function to truncate text
+  const truncateText = (text, maxLength = 200) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
   };
 
   const handleCopyReply = async (reply, index) => {
@@ -77,7 +88,19 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
             </button>
           </div>
           <div className="summary-content">
-            <p>{replies.summary}</p>
+            <p className={summaryExpanded ? 'summary-text-expanded' : 'summary-text-collapsed'}>
+              {summaryExpanded ? replies.summary : truncateText(replies.summary, 200)}
+            </p>
+            {replies.summary && replies.summary.length > 200 && (
+              <button
+                onClick={toggleSummaryExpanded}
+                className="btn btn-outline btn-small read-more-btn"
+                style={{ marginTop: '12px' }}
+              >
+                <i className={summaryExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}></i>
+                {summaryExpanded ? 'Show Less' : 'Read More'}
+              </button>
+            )}
           </div>
         </div>
       )}
