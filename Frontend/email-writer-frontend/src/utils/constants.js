@@ -1,5 +1,22 @@
 // API Configuration
-export const API_BASE_URL = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://your-deployed-backend-url.com');
+const getApiBaseUrl = () => {
+  // First priority: environment variable
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  // Second priority: detect environment
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:8081';
+  } else if (hostname.includes('staging')) {
+    // Optionally handle staging, fallback to env if not set
+    return '';
+  } else {
+    // Fallback: leave blank, user must set env for production
+    return '';
+  }
+};
+export const API_BASE_URL = getApiBaseUrl();
 
 // API Endpoints
 export const API_ENDPOINTS = {
