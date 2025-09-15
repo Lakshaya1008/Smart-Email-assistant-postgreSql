@@ -6,7 +6,7 @@ import { useNotification } from '../../hooks/useNotification';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import './EmailGenerator.css';
 
-const EmailGenerator = () => {
+const EmailGenerator = ({ onReplyGenerated }) => {
   const { showError, showSuccess } = useNotification();
   const [loading, setLoading] = useState(false);
   const [replies, setReplies] = useState(null);
@@ -19,6 +19,10 @@ const EmailGenerator = () => {
       setReplies(response);
       setLastRequest(emailData);
       showSuccess('Email replies generated successfully!');
+      // Trigger stats refresh when new replies are generated
+      if (onReplyGenerated) {
+        onReplyGenerated();
+      }
     } catch (error) {
       showError(error.message);
       setReplies(null);
@@ -35,6 +39,10 @@ const EmailGenerator = () => {
       const response = await emailService.regenerateReplies(lastRequest);
       setReplies(response);
       showSuccess('New reply variations generated!');
+      // Trigger stats refresh when replies are regenerated
+      if (onReplyGenerated) {
+        onReplyGenerated();
+      }
     } catch (error) {
       showError(error.message);
     } finally {

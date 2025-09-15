@@ -3,16 +3,29 @@ import { replyService } from '../../services/replyService';
 import { useNotification } from '../../hooks/useNotification';
 import './Layout.css';
 
-const Sidebar = ({ currentView, onViewChange, isOpen, onToggle }) => {
+const Sidebar = ({ currentView, onViewChange, isOpen, onToggle, onStatsRefresh }) => {
   const { showError } = useNotification();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Load stats immediately when component mounts
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  // Also load stats when sidebar opens if they're stale
   useEffect(() => {
     if (isOpen && !stats) {
       loadStats();
     }
   }, [isOpen, stats]);
+
+  // Expose refresh function to parent component
+  useEffect(() => {
+    if (onStatsRefresh) {
+      onStatsRefresh(loadStats);
+    }
+  }, [onStatsRefresh]);
 
   const loadStats = async () => {
     setLoading(true);
@@ -163,8 +176,13 @@ const Sidebar = ({ currentView, onViewChange, isOpen, onToggle }) => {
             <div className="footer-content">
               <small>Smart Email Assistant v1.0</small>
               <div className="footer-links">
-                <button className="footer-link" title="Refresh statistics">
-                  <i className="fas fa-sync-alt"></i>
+                <button 
+                  className="footer-link" 
+                  title="Refresh statistics"
+                  onClick={loadStats}
+                  disabled={loading}
+                >
+                  <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
                 </button>
                 <button className="footer-link" title="Help & Support">
                   <i className="fas fa-question-circle"></i>

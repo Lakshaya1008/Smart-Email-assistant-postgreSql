@@ -3,7 +3,7 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import './Layout.css';
 
-const Layout = ({ currentView, onViewChange, children }) => {
+const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -39,6 +39,7 @@ const Layout = ({ currentView, onViewChange, children }) => {
           onViewChange={onViewChange}
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
+          onStatsRefresh={onStatsRefresh}
         />
         
         <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>

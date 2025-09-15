@@ -18,6 +18,19 @@ function App() {
   const { notification } = useNotification();
   const [currentView, setCurrentView] = useState('generator');
   const [showLogin, setShowLogin] = useState(true);
+  const [statsRefreshFn, setStatsRefreshFn] = useState(null);
+
+  // Function to handle stats refresh from sidebar
+  const handleStatsRefresh = (refreshFunction) => {
+    setStatsRefreshFn(() => refreshFunction);
+  };
+
+  // Function to trigger stats refresh
+  const refreshStats = () => {
+    if (statsRefreshFn) {
+      statsRefreshFn();
+    }
+  };
 
   // Show loading spinner while checking authentication
   if (authLoading) {
@@ -68,19 +81,23 @@ function App() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'generator':
-        return <EmailGenerator />;
+        return <EmailGenerator onReplyGenerated={refreshStats} />;
       case 'saved':
-        return <SavedReplies />;
+        return <SavedReplies onReplyUpdated={refreshStats} />;
       case 'statistics':
         return <Statistics />;
       default:
-        return <EmailGenerator />;
+        return <EmailGenerator onReplyGenerated={refreshStats} />;
     }
   };
 
   return (
     <div className="App">
-      <Layout currentView={currentView} onViewChange={setCurrentView}>
+      <Layout 
+        currentView={currentView} 
+        onViewChange={setCurrentView}
+        onStatsRefresh={handleStatsRefresh}
+      >
         {renderCurrentView()}
       </Layout>
       

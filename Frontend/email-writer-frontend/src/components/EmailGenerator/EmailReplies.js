@@ -11,6 +11,15 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
   const [savingIndex, setSavingIndex] = useState(null);
   const [expandedReply, setExpandedReply] = useState(null);
 
+  const handleCopySummary = async () => {
+    try {
+      await copyToClipboard(replies.summary);
+      showSuccess('Email summary copied to clipboard!');
+    } catch (error) {
+      showError('Failed to copy summary to clipboard');
+    }
+  };
+
   const handleCopyReply = async (reply, index) => {
     try {
       await copyToClipboard(reply);
@@ -24,9 +33,9 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
     setSavingIndex(index);
     try {
       await replyService.saveReply({
-        emailSubject: 'Generated Reply', // Could be enhanced to use actual subject
-        emailContent: 'Original email content', // Could be enhanced
-        tone: 'professional', // Could be enhanced
+        emailSubject: 'Generated Reply',
+        emailContent: 'Original email content',
+        tone: 'professional',
         replyText: reply,
         summary: replies.summary
       });
@@ -50,18 +59,36 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
 
   return (
     <div className="email-replies">
+      {/* Email Summary Section */}
+      {replies.summary && (
+        <div className="email-summary-section">
+          <div className="summary-header">
+            <h3 className="summary-title">
+              <i className="fas fa-file-alt"></i>
+              Email Summary
+            </h3>
+            <button
+              onClick={handleCopySummary}
+              className="btn btn-outline btn-small summary-copy-btn"
+              title="Copy summary to clipboard"
+            >
+              <i className="fas fa-copy"></i>
+              Copy
+            </button>
+          </div>
+          <div className="summary-content">
+            <p>{replies.summary}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Generated Replies Section */}
       <div className="replies-header">
         <div className="replies-title-section">
           <h2 className="replies-title">
             <i className="fas fa-reply-all"></i>
             Generated Replies
           </h2>
-          {replies.summary && (
-            <div className="replies-summary">
-              <i className="fas fa-info-circle"></i>
-              <span>{replies.summary}</span>
-            </div>
-          )}
         </div>
 
         <div className="replies-actions">
@@ -82,7 +109,6 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
               </>
             )}
           </button>
-          
           <button
             onClick={onClear}
             className="btn btn-secondary"

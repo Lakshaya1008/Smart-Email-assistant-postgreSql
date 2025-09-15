@@ -8,7 +8,7 @@ import ReplyCard from './ReplyCard';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import './SavedReplies.css';
 
-const SavedReplies = () => {
+const SavedReplies = ({ onReplyUpdated }) => {
   const { showError, showSuccess } = useNotification();
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,6 +113,11 @@ const SavedReplies = () => {
           : reply
       ));
       
+      // Trigger stats refresh
+      if (onReplyUpdated) {
+        onReplyUpdated();
+      }
+      
       showSuccess(response.message);
     } catch (error) {
       showError(error.message);
@@ -123,6 +128,12 @@ const SavedReplies = () => {
     try {
       await replyService.deleteReply(replyId);
       setReplies(prev => prev.filter(reply => reply.id !== replyId));
+      
+      // Trigger stats refresh
+      if (onReplyUpdated) {
+        onReplyUpdated();
+      }
+      
       showSuccess('Reply deleted successfully');
     } catch (error) {
       showError(error.message);
