@@ -58,5 +58,6 @@ public class SavedReply {
         this.tone = tone;
         this.replyText = replyText;
         this.summary = summary;
+        this.isFavorite = false;  // Explicitly set to prevent null values
     }
 }

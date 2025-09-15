@@ -41,12 +41,12 @@ public class SavedReplyService {
 
     /**
      * Save a new reply to the database.
-     * 
+     *
      * Business Logic:
      * - Creates new SavedReply entity from request
      * - Associates with authenticated user
      * - Persists to database with timestamp
-     * 
+     *
      * @param req Contains reply details and metadata
      * @param user Authenticated user who owns this reply
      * @return Persisted SavedReply with generated ID
@@ -57,17 +57,17 @@ public class SavedReplyService {
             user.getUsername(), req.getEmailSubject());
             
         SavedReply sr = new SavedReply(
-            user, 
-            req.getEmailSubject(), 
-            req.getEmailContent(), 
-            req.getTone(), 
-            req.getReplyText(), 
+            user,
+            req.getEmailSubject(),
+            req.getEmailContent(),
+            req.getTone(),
+            req.getReplyText(),
             req.getSummary()
         );
-        
+
         SavedReply saved = repo.save(sr);
         log.info("Reply saved with ID {} for user {}", saved.getId(), user.getUsername());
-        
+
         return saved;
     }
 
