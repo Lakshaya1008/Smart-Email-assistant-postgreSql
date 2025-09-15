@@ -591,8 +591,10 @@
   font-size: var(--font-size-base);
   font-weight: 400;
   color: var(--text-primary);
-  /* Same line-clamp behavior as reply cards */
-  line-height: 1.6;
+  /* Enhanced readability for longer content */
+  line-height: 1.7;
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-sm) 0;
 }
 
 .summary-card .action-btn {
@@ -608,8 +610,8 @@
 /* Summary text states for expanded/collapsed */
 .summary-collapsed {
   display: -webkit-box !important;
-  -webkit-line-clamp: 3 !important;
-  line-clamp: 3 !important;
+  -webkit-line-clamp: 6 !important;
+  line-clamp: 6 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;

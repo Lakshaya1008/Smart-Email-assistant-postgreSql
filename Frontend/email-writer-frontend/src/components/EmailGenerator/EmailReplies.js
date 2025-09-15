@@ -26,7 +26,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
   };
 
   // Helper function to truncate text
-  const truncateText = (text, maxLength = 150) => {
+  const truncateText = (text, maxLength = 400) => {
     if (!text || text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
@@ -86,7 +86,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
               >
                 <i className="fas fa-copy"></i>
               </button>
-              {replies.summary && replies.summary.length > 150 && (
+              {replies.summary && replies.summary.length > 400 && (
                 <button
                   onClick={toggleSummaryExpanded}
                   className="action-btn"
@@ -99,7 +99,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
           </div>
           <div className="reply-content">
             <p className={`reply-text ${summaryExpanded ? 'summary-expanded' : 'summary-collapsed'}`}>
-              {summaryExpanded ? replies.summary : truncateText(replies.summary, 150)}
+              {summaryExpanded ? replies.summary : truncateText(replies.summary, 400)}
             </p>
           </div>
           <div className="reply-footer">
@@ -107,7 +107,7 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
               <span className="reply-length">{replies.summary.split(' ').length} words</span>
               <span className="reply-chars">{replies.summary.length} characters</span>
             </div>
-            {replies.summary && replies.summary.length > 150 && (
+            {replies.summary && replies.summary.length > 400 && (
               <button
                 onClick={toggleSummaryExpanded}
                 className="btn btn-outline btn-small"
