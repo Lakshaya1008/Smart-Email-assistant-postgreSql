@@ -22,7 +22,12 @@ An **AI-powered email assistant** that helps you **write, summarize, and customi
 - 📝 Email Summarization – Quickly condense long emails into short summaries  
 - 🎭 Tone Selection – Choose between Formal, Casual, or Friendly  
 - 📋 Copy-to-Clipboard – One-click copy for generated responses  
+- 💾 Saved Replies – Save, manage, and reuse frequently used email responses  
+- ❤️ Favorites – Mark important replies as favorites for quick access  
+- 📤 Export Replies – Download saved replies for external use or backup  
+- 📊 Statistics Dashboard – Track usage patterns, tone distribution, and activity  
 - 📱 Responsive UI – Works across desktop and mobile  
+
 
 ---
 
@@ -101,8 +106,7 @@ npm start
 
 - ✅ JWT-based Authentication (Login/Register)  
 - ✅ PostgreSQL Database Integration  
-- 🔲 Multiple reply options + history  
-- 🔲 Dark Mode UI  
+- 🔲 Multiple reply options + history   
 - 🔲 Multi-language support  
 
 ---
