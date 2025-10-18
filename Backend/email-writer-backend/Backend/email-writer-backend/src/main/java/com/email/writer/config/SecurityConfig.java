@@ -23,28 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Spring Security configuration for JWT + CORS (Spring Security 6.2+).
- *
- * This configuration class sets up security filters, CORS settings, and authentication providers.
- * It enables method-level security and configures stateless session management for JWT-based authentication.
- *
- * Key Features:
- * - CORS configuration to allow requests from specified origins.
- * - Disables CSRF protection as JWT is used for stateless authentication.
- * - Permits unauthenticated access to specific endpoints (e.g., /api/auth/**).
- * - Secures all other endpoints, requiring authentication.
- * - Configures a custom JWT authentication filter to validate tokens.
- * - Uses BCrypt for password encoding.
- *
- * Note: Ensure that the JwtAuthenticationFilter and UserDetailsService are properly implemented
- * to handle JWT validation and user retrieval respectively.
- *
- * @version 1.0
- * @since 2024-06-01
- * @see JwtAuthenticationFilter
- * @see UserDetailsService
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -66,7 +44,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider()) // ✅ updated bean
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -75,7 +53,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:3001"));
+
+        // ✅ Use environment variable from Render and local dev URLs
+        cfg.setAllowedOriginPatterns(List.of(
+                System.getenv("CORS_ALLOWED_ORIGINS"),
+                "http://localhost:3000",
+                "http://localhost:3001"
+        ));
+
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
@@ -85,9 +70,6 @@ public class SecurityConfig {
         return src;
     }
 
-    /**
-     * Replace deprecated DaoAuthenticationProvider + setUserDetailsService
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -96,9 +78,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    /**
-     * Use AuthenticationConfiguration to expose AuthenticationManager.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
