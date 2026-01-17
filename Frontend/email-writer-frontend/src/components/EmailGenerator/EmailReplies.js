@@ -108,20 +108,16 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
               {truncateText(replies.summary, 200)}
             </p>
           </div>
-          <div className="reply-footer">
-            <div className="reply-stats">
-              <span className="reply-length">{replies.summary.split(' ').length} words</span>
-              <span className="reply-chars">{replies.summary.length} characters</span>
-            </div>
-            {replies.summary && replies.summary.length > 180 && (
+          {replies.summary && replies.summary.length > 180 && (
+            <div className="reply-footer">
               <button
                 onClick={openSummaryModal}
                 className="btn btn-outline btn-small"
               >
                 Read More
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -204,17 +200,6 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
             <div className="reply-content">
               <p className="reply-text">{reply}</p>
             </div>
-
-            <div className="reply-footer">
-              <div className="reply-stats">
-                <span className="reply-length">
-                  {reply.split(' ').length} words
-                </span>
-                <span className="reply-chars">
-                  {reply.length} characters
-                </span>
-              </div>
-            </div>
           </div>
         ))}
       </div>
@@ -259,21 +244,6 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
                 )}
               </button>
             </div>
-
-            <div className="expanded-reply-stats">
-              <div className="stat-item">
-                <i className="fas fa-file-word"></i>
-                <span>{expandedReply.reply.split(' ').length} words</span>
-              </div>
-              <div className="stat-item">
-                <i className="fas fa-font"></i>
-                <span>{expandedReply.reply.length} characters</span>
-              </div>
-              <div className="stat-item">
-                <i className="fas fa-paragraph"></i>
-                <span>{expandedReply.reply.split('\n').length} paragraphs</span>
-              </div>
-            </div>
           </div>
         </Modal>
       )}
@@ -299,21 +269,6 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
                 <i className="fas fa-copy"></i>
                 Copy to Clipboard
               </button>
-            </div>
-
-            <div className="expanded-reply-stats">
-              <div className="stat-item">
-                <i className="fas fa-file-word"></i>
-                <span>{replies.summary.split(' ').length} words</span>
-              </div>
-              <div className="stat-item">
-                <i className="fas fa-font"></i>
-                <span>{replies.summary.length} characters</span>
-              </div>
-              <div className="stat-item">
-                <i className="fas fa-paragraph"></i>
-                <span>{replies.summary.split('\n').length} paragraphs</span>
-              </div>
             </div>
           </div>
         </Modal>
