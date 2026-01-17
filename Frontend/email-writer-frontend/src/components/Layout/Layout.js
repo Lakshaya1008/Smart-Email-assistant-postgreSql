@@ -56,12 +56,39 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
           </div>
 
           <footer className="main-footer">
-            <p>
-              Built by Lakshaya Jain ·
-              <a href="https://github.com/Lakshaya1008" target="_blank" rel="noopener noreferrer"> GitHub</a> ·
-              <a href="https://www.linkedin.com/in/lakshaya-jain-195075252" target="_blank" rel="noopener noreferrer"> LinkedIn</a> ·
-              <a href="mailto:lakshayajain93@gmail.com"> Email</a>
-            </p>
+            <div className="footer-content">
+              <div className="footer-branding">
+                <i className="fas fa-envelope-open-text footer-icon"></i>
+                <h3>Smart Email Assistant</h3>
+                <p className="footer-tagline">AI-Powered Email Reply Generation</p>
+              </div>
+
+              <div className="footer-divider"></div>
+
+              <div className="footer-creator">
+                <p className="creator-label">Designed & Developed by</p>
+                <p className="creator-name">Lakshaya Jain</p>
+
+                <div className="footer-links">
+                  <a href="https://github.com/Lakshaya1008" target="_blank" rel="noopener noreferrer" className="footer-link">
+                    <i className="fab fa-github"></i>
+                    <span>GitHub</span>
+                  </a>
+                  <a href="https://www.linkedin.com/in/lakshaya-jain-195075252" target="_blank" rel="noopener noreferrer" className="footer-link">
+                    <i className="fab fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                  </a>
+                  <a href="mailto:lakshayajain93@gmail.com" className="footer-link">
+                    <i className="fas fa-envelope"></i>
+                    <span>Email</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="footer-bottom">
+                <p>&copy; 2026 Smart Email Assistant. All rights reserved.</p>
+              </div>
+            </div>
           </footer>
         </main>
       </div>

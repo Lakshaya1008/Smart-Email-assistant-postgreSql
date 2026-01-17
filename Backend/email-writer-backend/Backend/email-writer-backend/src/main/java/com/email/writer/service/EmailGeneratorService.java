@@ -61,7 +61,6 @@ public class EmailGeneratorService {
     public Map<String, Object> generateMultipleEmailReplies(EmailRequest request, boolean regenerate) {
         final String language = (request.getLanguage() == null || request.getLanguage().isBlank()) ? "en" : request.getLanguage();
         String prompt = buildMultipleRepliesPrompt(request, language, regenerate);
-        log.debug("Built multiple replies prompt: {}", prompt);
 
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
@@ -69,7 +68,7 @@ public class EmailGeneratorService {
                 ),
                 "generationConfig", Map.of(
                         "temperature", regenerate ? 0.9 : 0.75,
-                        "maxOutputTokens", 2048,
+                        "maxOutputTokens", 4096,  // Increased to allow full summary + 3 complete replies
                         "topP", 0.95,
                         "topK", 40
                 )
@@ -85,7 +84,6 @@ public class EmailGeneratorService {
                     .bodyToMono(String.class)
                     .block();
 
-            log.debug("Raw Gemini response: {}", raw == null ? "null" : raw.substring(0, Math.min(1000, raw.length())));
             return parseMultipleRepliesResponse(raw);
         } catch (Exception ex) {
             log.error("Gemini API call failed", ex);
@@ -106,7 +104,7 @@ public class EmailGeneratorService {
                 "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
                 "generationConfig", Map.of(
                         "temperature", 0.7,
-                        "maxOutputTokens", 1024,
+                        "maxOutputTokens", 2048,  // Sufficient for single reply + comprehensive summary
                         "topP", 0.8,
                         "topK", 40
                 )
@@ -301,13 +299,8 @@ public class EmailGeneratorService {
             // Clean up summary
             summary = summary.trim();
 
-            // FIXED: Removed 200-character hard limit. Backend should return full summary.
+            // FIXED: Removed 200-character hard limit. Backend returns full summary.
             // Frontend is responsible for truncation/preview logic as needed.
-            // Previous code: if (summary.length() > 200) { summary = summary.substring(0, 197) + "..."; }
-
-            log.info("FULL SUMMARY BEFORE RESPONSE: {}", summary);
-            log.info("SUMMARY LENGTH BEFORE RESPONSE: {}", summary.length());
-            log.debug("Parsed {} replies", replies.size());
 
             return Map.of(
                 "replies", replies,
