@@ -54,6 +54,15 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
           <div className="content-container">
             {children}
           </div>
+
+          <footer className="main-footer">
+            <p>
+              Built by Lakshaya Jain ·
+              <a href="https://github.com/Lakshaya1008" target="_blank" rel="noopener noreferrer"> GitHub</a> ·
+              <a href="https://www.linkedin.com/in/lakshaya-jain-195075252" target="_blank" rel="noopener noreferrer"> LinkedIn</a> ·
+              <a href="mailto:lakshayajain93@gmail.com"> Email</a>
+            </p>
+          </footer>
         </main>
       </div>
     </div>
