@@ -110,6 +110,7 @@ const EmailGenerator = ({ onReplyGenerated }) => {
               onClear={handleClearReplies}
               canRegenerate={!!lastRequest}
               loading={loading}
+              onReplySaved={onReplyGenerated}
             />
           </div>
         )}

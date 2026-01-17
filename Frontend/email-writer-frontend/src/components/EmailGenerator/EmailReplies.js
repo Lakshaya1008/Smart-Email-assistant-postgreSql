@@ -56,6 +56,11 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
         summary: replies.summary
       });
       showSuccess(`Reply ${index + 1} saved successfully!`);
+
+      // Trigger stats refresh
+      if (onReplySaved) {
+        onReplySaved();
+      }
     } catch (error) {
       showError('Failed to save reply');
     } finally {
@@ -270,7 +275,7 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
                 Copy to Clipboard
               </button>
             </div>
-should           </div>
+          </div>
         </Modal>
       )}
     </div>
