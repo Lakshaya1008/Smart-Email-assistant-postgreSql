@@ -6,11 +6,11 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import Modal from '../Common/Modal';
 import './EmailGenerator.css';
 
-const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }) => {
+const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegenerate, loading }) => {
   const { showSuccess, showError } = useNotification();
   const [savingIndex, setSavingIndex] = useState(null);
   const [expandedReply, setExpandedReply] = useState(null);
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
 
   const handleCopySummary = async () => {
     try {
@@ -21,8 +21,12 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
     }
   };
 
-  const toggleSummaryExpanded = () => {
-    setSummaryExpanded(prev => !prev);
+  const openSummaryModal = () => {
+    setShowSummaryModal(true);
+  };
+
+  const closeSummaryModal = () => {
+    setShowSummaryModal(false);
   };
 
   // Helper function to truncate text
@@ -87,20 +91,20 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
               >
                 <i className="fas fa-copy"></i>
               </button>
-              {replies.summary && replies.summary.length > 150 && (
+              {replies.summary && replies.summary.length > 200 && (
                 <button
-                  onClick={toggleSummaryExpanded}
+                  onClick={openSummaryModal}
                   className="action-btn"
-                  title={summaryExpanded ? 'Show less' : 'Read more'}
+                  title="View full summary"
                 >
-                  <i className={summaryExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'}></i>
+                  <i className="fas fa-expand"></i>
                 </button>
               )}
             </div>
           </div>
           <div className="reply-content">
-            <p className={`reply-text ${summaryExpanded ? 'summary-expanded' : 'summary-collapsed'}`}>
-              {summaryExpanded ? replies.summary : truncateText(replies.summary, 150)}
+            <p className="reply-text">
+              {truncateText(replies.summary, 200)}
             </p>
           </div>
           <div className="reply-footer">
@@ -108,12 +112,12 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
               <span className="reply-length">{replies.summary.split(' ').length} words</span>
               <span className="reply-chars">{replies.summary.length} characters</span>
             </div>
-            {replies.summary && replies.summary.length > 150 && (
+            {replies.summary && replies.summary.length > 200 && (
               <button
-                onClick={toggleSummaryExpanded}
+                onClick={openSummaryModal}
                 className="btn btn-outline btn-small"
               >
-                {summaryExpanded ? 'Show Less' : 'Read More'}
+                Read More
               </button>
             )}
           </div>

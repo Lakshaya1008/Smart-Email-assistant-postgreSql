@@ -89,7 +89,10 @@ const Header = ({ onViewChange }) => {
                     <div className="user-menu-items">
                       <button
                           className="user-menu-item"
-                          onClick={toggleTheme}
+                          onClick={() => {
+                            toggleTheme();
+                            setShowUserMenu(false);
+                          }}
                       >
                         <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
                         {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
