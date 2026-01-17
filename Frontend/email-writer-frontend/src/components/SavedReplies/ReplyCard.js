@@ -118,25 +118,14 @@ const ReplyCard = ({ reply, onToggleFavorite, onDelete }) => {
           </div>
         </div>
 
-        <div className="reply-card-footer">
-          <div className="reply-stats">
-            <span className="stat-item">
-              <i className="fas fa-file-word"></i>
-              {reply.replyText.split(' ').length} words
-            </span>
-            <span className="stat-item">
-              <i className="fas fa-font"></i>
-              {reply.replyText.length} chars
-            </span>
-          </div>
-          
-          {reply.isFavorite && (
+        {reply.isFavorite && (
+          <div className="reply-card-footer">
             <div className="favorite-indicator">
               <i className="fas fa-heart"></i>
               <span>Favorite</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Full Reply Modal */}
@@ -160,10 +149,6 @@ const ReplyCard = ({ reply, onToggleFavorite, onDelete }) => {
                     <span className="tone-badge">{reply.tone}</span>
                   </div>
                 )}
-                <div className="meta-item">
-                  <label>Length:</label>
-                  <span>{reply.replyText.split(' ').length} words, {reply.replyText.length} characters</span>
-                </div>
               </div>
             </div>
 
