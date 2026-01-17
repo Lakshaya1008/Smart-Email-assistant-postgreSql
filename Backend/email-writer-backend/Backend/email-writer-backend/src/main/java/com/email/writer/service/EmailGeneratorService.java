@@ -168,7 +168,7 @@ public class EmailGeneratorService {
         StringBuilder prompt = new StringBuilder();
 
         // Base instructions
-        prompt.append("You are an expert email assistant. You must generate exactly 3 different professional email replies and 1 summary.\n");
+        prompt.append("You are an expert email assistant. You must generate exactly 3 different professional email replies and 1 comprehensive summary.\n");
         prompt.append("IMPORTANT: Generate the reply in ").append(language).append(" language.\n\n");
 
         // Add tone instruction
@@ -189,7 +189,10 @@ public class EmailGeneratorService {
 
         // STRICT output format instructions
         prompt.append("You MUST follow this EXACT format:\n\n");
-        prompt.append("SUMMARY: [Write a brief 1-2 sentence summary of the key points from the original email and what the replies address]\n\n");
+        prompt.append("SUMMARY: Write a detailed, complete summary of the original email. ");
+        prompt.append("The summary must fully explain all key points, context, intent, and any requests or deadlines mentioned. ");
+        prompt.append("Do NOT limit length. Do NOT shorten. Do NOT summarize briefly. ");
+        prompt.append("IMPORTANT: The summary must be comprehensive and may be multiple sentences or paragraphs if needed.\n\n");
         prompt.append("REPLY 1: [First reply variation - 3-5 sentences, professional tone]\n\n");
         prompt.append("REPLY 2: [Second reply variation - 3-5 sentences, different approach]\n\n");
         prompt.append("REPLY 3: [Third reply variation - 3-5 sentences, alternative style]\n\n");
@@ -206,8 +209,8 @@ public class EmailGeneratorService {
 
     private String buildSingleReplyPrompt(EmailRequest request, String language) {
         return String.format(
-            "You are a professional email assistant. Provide a short Summary and a single Reply body in %s.\n" +
-            "Summary: (1-2 sentences)\n" +
+            "You are a professional email assistant. Provide a comprehensive Summary and a single Reply body in %s.\n" +
+            "Summary: Provide a detailed, complete summary that fully explains all key points, context, and intent. Do NOT limit length.\n" +
             "Reply: (3-5 sentences, body only, no salutation/signature)\n\n" +
             "EMAIL:\nSubject: %s\n" +
             "Content: %s\n" +
@@ -297,11 +300,13 @@ public class EmailGeneratorService {
 
             // Clean up summary
             summary = summary.trim();
-            if (summary.length() > 200) {
-                summary = summary.substring(0, 197) + "...";
-            }
 
-            log.debug("Parsed summary: {}", summary);
+            // FIXED: Removed 200-character hard limit. Backend should return full summary.
+            // Frontend is responsible for truncation/preview logic as needed.
+            // Previous code: if (summary.length() > 200) { summary = summary.substring(0, 197) + "..."; }
+
+            log.info("FULL SUMMARY BEFORE RESPONSE: {}", summary);
+            log.info("SUMMARY LENGTH BEFORE RESPONSE: {}", summary.length());
             log.debug("Parsed {} replies", replies.size());
 
             return Map.of(
