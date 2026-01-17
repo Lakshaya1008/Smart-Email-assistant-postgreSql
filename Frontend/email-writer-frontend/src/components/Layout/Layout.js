@@ -61,6 +61,9 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
                 <i className="fas fa-envelope-open-text footer-icon"></i>
                 <h3>Smart Email Assistant</h3>
                 <p className="footer-tagline">AI-Powered Email Reply Generation</p>
+                <a href="mailto:lakshayajain93@gmail.com" className="footer-email-direct">
+                  lakshayajain93@gmail.com
+                </a>
               </div>
 
               <div className="footer-divider"></div>
@@ -78,10 +81,6 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
                     <i className="fab fa-linkedin"></i>
                     <span>LinkedIn</span>
                   </a>
-                  <button onClick={handleEmailClick} className="footer-link footer-link-button">
-                    <i className="fas fa-envelope"></i>
-                    <span>Email</span>
-                  </button>
                 </div>
               </div>
 
