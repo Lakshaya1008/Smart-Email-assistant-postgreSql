@@ -272,6 +272,47 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
           </div>
         </Modal>
       )}
+
+      {/* Summary Modal */}
+      {showSummaryModal && (
+        <Modal
+          isOpen={true}
+          onClose={closeSummaryModal}
+          title="Email Summary - Full View"
+          size="large"
+        >
+          <div className="expanded-reply">
+            <div className="expanded-reply-content">
+              <p className="expanded-reply-text">{replies.summary}</p>
+            </div>
+
+            <div className="expanded-reply-actions">
+              <button
+                onClick={handleCopySummary}
+                className="btn btn-outline"
+              >
+                <i className="fas fa-copy"></i>
+                Copy to Clipboard
+              </button>
+            </div>
+
+            <div className="expanded-reply-stats">
+              <div className="stat-item">
+                <i className="fas fa-file-word"></i>
+                <span>{replies.summary.split(' ').length} words</span>
+              </div>
+              <div className="stat-item">
+                <i className="fas fa-font"></i>
+                <span>{replies.summary.length} characters</span>
+              </div>
+              <div className="stat-item">
+                <i className="fas fa-paragraph"></i>
+                <span>{replies.summary.split('\n').length} paragraphs</span>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

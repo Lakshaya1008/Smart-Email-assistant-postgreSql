@@ -624,23 +624,6 @@
   color: white;
 }
 
-/* Summary text states for expanded/collapsed */
-.summary-collapsed {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 3 !important;
-  line-clamp: 3 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.summary-expanded {
-  display: block !important;
-  overflow: visible !important;
-  -webkit-line-clamp: unset !important;
-  line-clamp: unset !important;
-  animation: fadeIn 0.3s ease-out;
-}
 
 /* === Replies Grid === */
 .replies-grid {
