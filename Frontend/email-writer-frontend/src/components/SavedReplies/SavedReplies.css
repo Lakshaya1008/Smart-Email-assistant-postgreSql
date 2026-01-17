@@ -359,9 +359,34 @@
 /* Loading States */
 .replies-loading {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 400px;
+  gap: var(--spacing-lg);
+}
+
+.replies-loading .cold-start-message {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  animation: fadeIn 0.3s ease-in;
+}
+
+.replies-loading .cold-start-message i {
+  color: var(--info-color);
+  font-size: var(--font-size-base);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Empty States */

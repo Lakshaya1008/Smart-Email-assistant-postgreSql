@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EMAIL_TONES, LANGUAGE_OPTIONS } from '../../utils/constants';
 import { rateLimiter } from '../../utils/rateLimiter';
 import LoadingSpinner from '../Common/LoadingSpinner';
@@ -14,20 +14,6 @@ const EmailForm = ({ onGenerate, loading }) => {
   });
   const [errors, setErrors] = useState({});
   const [rateLimitStatus, setRateLimitStatus] = useState(null);
-  const [usageStats, setUsageStats] = useState(null);
-
-  // Update rate limit status periodically
-  useEffect(() => {
-    const updateStatus = () => {
-      const stats = rateLimiter.getUsageStats();
-      setUsageStats(stats);
-    };
-
-    updateStatus();
-    const interval = setInterval(updateStatus, 5000); // Update every 5 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -134,37 +120,6 @@ const EmailForm = ({ onGenerate, loading }) => {
         <p className="form-description">
           Paste the email you want to respond to, and we'll generate multiple reply options.
         </p>
-        {/* API Usage Stats */}
-        {usageStats && (
-          <div className="api-usage-stats">
-            <div className="usage-grid">
-              <div className="usage-item">
-                <span className="usage-label">Today:</span>
-                <span className="usage-value">
-                  {usageStats.requestsToday}/{usageStats.maxRequestsPerDay}
-                </span>
-                <div className="usage-bar">
-                  <div 
-                    className="usage-fill"
-                    style={{ width: `${Math.min(usageStats.percentageUsed.daily, 100)}%` }}
-                  />
-                </div>
-              </div>
-              <div className="usage-item">
-                <span className="usage-label">This Minute:</span>
-                <span className="usage-value">
-                  {usageStats.requestsThisMinute}/{usageStats.maxRequestsPerMinute}
-                </span>
-                <div className="usage-bar">
-                  <div 
-                    className="usage-fill"
-                    style={{ width: `${Math.min(usageStats.percentageUsed.minute, 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Rate Limit Warning */}

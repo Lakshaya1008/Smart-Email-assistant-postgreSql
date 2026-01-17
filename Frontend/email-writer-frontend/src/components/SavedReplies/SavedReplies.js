@@ -47,6 +47,13 @@ const SavedReplies = ({ onReplyUpdated }) => {
 
   const loadReplies = async (page = 0) => {
     setLoading(true);
+    setColdStart(false);
+
+    // Show cold start message after 7 seconds
+    const coldStartTimer = setTimeout(() => {
+      setColdStart(true);
+    }, 7000);
+
     try {
       let response;
       
@@ -78,7 +85,9 @@ const SavedReplies = ({ onReplyUpdated }) => {
       showError(error.message);
       setReplies([]);
     } finally {
+      clearTimeout(coldStartTimer);
       setLoading(false);
+      setColdStart(false);
     }
   };
 
@@ -240,6 +249,12 @@ const SavedReplies = ({ onReplyUpdated }) => {
           {loading ? (
             <div className="replies-loading">
               <LoadingSpinner size="large" text="Loading saved replies..." />
+              {coldStart && (
+                <div className="cold-start-message">
+                  <i className="fas fa-clock"></i>
+                  <span>Waking up the server… This may take a few seconds.</span>
+                </div>
+              )}
             </div>
           ) : replies.length > 0 ? (
             <>

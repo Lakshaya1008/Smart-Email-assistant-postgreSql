@@ -1,40 +1,23 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../hooks/useNotification';
+import { useTheme } from '../../hooks/useTheme';
 import { formatName } from '../../utils/helpers';
+import Modal from '../Common/Modal';
 import './Layout.css';
 
-const Header = ({ currentView, onViewChange }) => {
+const Header = ({ onViewChange }) => {
   const { user, logout } = useAuth();
   const { showSuccess } = useNotification();
+  const { theme, toggleTheme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const handleLogout = () => {
     logout();
     showSuccess('You have been logged out successfully.');
     setShowUserMenu(false);
   };
-
-  const navigationItems = [
-    {
-      id: 'generator',
-      label: 'Email Generator',
-      icon: 'fas fa-magic',
-      description: 'Generate AI-powered email replies'
-    },
-    {
-      id: 'saved',
-      label: 'Saved Replies',
-      icon: 'fas fa-bookmark',
-      description: 'View and manage your saved replies'
-    },
-    {
-      id: 'statistics',
-      label: 'Statistics',
-      icon: 'fas fa-chart-bar',
-      description: 'View your usage statistics'
-    }
-  ];
 
   return (
     <header className="header">
@@ -46,19 +29,6 @@ const Header = ({ currentView, onViewChange }) => {
           </h1>
         </div>
 
-        <nav className="header-nav">
-          {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${currentView === item.id ? 'active' : ''}`}
-              onClick={() => onViewChange(item.id)}
-              title={item.description}
-            >
-              <i className={item.icon}></i>
-              <span className="nav-label">{item.label}</span>
-            </button>
-          ))}
-        </nav>
 
         <div className="header-user">
           <div className="user-menu-container">
@@ -119,6 +89,31 @@ const Header = ({ currentView, onViewChange }) => {
 
                 <div className="user-menu-items">
                   <button
+                    className="user-menu-item"
+                    onClick={() => {
+                      toggleTheme();
+                    }}
+                  >
+                    <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+                    {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                  </button>
+
+                  <button
+                    className="user-menu-item"
+                    onClick={() => {
+                      setShowAbout(true);
+                      setShowUserMenu(false);
+                    }}
+                  >
+                    <i className="fas fa-info-circle"></i>
+                    About
+                  </button>
+                </div>
+
+                <div className="user-menu-divider"></div>
+
+                <div className="user-menu-items">
+                  <button
                     className="user-menu-item danger"
                     onClick={handleLogout}
                   >
@@ -138,6 +133,64 @@ const Header = ({ currentView, onViewChange }) => {
           className="mobile-overlay"
           onClick={() => setShowUserMenu(false)}
         ></div>
+      )}
+
+      {/* About Modal */}
+      {showAbout && (
+        <Modal
+          isOpen={true}
+          onClose={() => setShowAbout(false)}
+          title="About Smart Email Assistant"
+          size="medium"
+        >
+          <div className="about-modal">
+            <div className="about-header">
+              <i className="fas fa-envelope-open-text about-icon"></i>
+              <h3>Smart Email Assistant</h3>
+              <p className="about-version">Version 1.0.0</p>
+            </div>
+
+            <div className="about-description">
+              <p>AI-powered email reply generation using advanced language models</p>
+            </div>
+
+            <div className="about-developer">
+              <h4>Developer</h4>
+              <p>Lakshaya Jain</p>
+            </div>
+
+            <div className="about-links">
+              <h4>Connect</h4>
+              <div className="link-buttons">
+                <a
+                  href="https://github.com/Lakshaya1008"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about-link"
+                >
+                  <i className="fab fa-github"></i>
+                  GitHub
+                </a>
+                <a
+                  href="www.linkedin.com/in/lakshaya-jain-195075252"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about-link"
+                >
+                  <i className="fab fa-linkedin"></i>
+                  LinkedIn
+                </a>
+                <a
+                  href="mailto:lakshayajain93@gmail.com"
+                  className="about-link"
+                >
+                  <i className="fas fa-envelope"></i>
+                  Email
+                </a>
+              </div>
+            </div>
+          </div>
+        </Modal>
       )}
     </header>
   );

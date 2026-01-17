@@ -5,12 +5,10 @@ import './Layout.css';
 
 const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Check if screen is mobile size
   useEffect(() => {
     const checkMobileSize = () => {
-      setIsMobile(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
         setSidebarOpen(false);
       }
@@ -51,16 +49,6 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
             >
               <i className="fas fa-bars"></i>
             </button>
-            
-            <div className="breadcrumb">
-              <i className="fas fa-home"></i>
-              <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-current">
-                {currentView === 'generator' && 'Email Generator'}
-                {currentView === 'saved' && 'Saved Replies'}
-                {currentView === 'statistics' && 'Statistics'}
-              </span>
-            </div>
           </div>
           
           <div className="content-container">

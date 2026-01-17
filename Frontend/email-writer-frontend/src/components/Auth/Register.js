@@ -18,6 +18,8 @@ const Register = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -76,9 +78,7 @@ const Register = () => {
       await register({
         username: formData.username.trim(),
         email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        firstName: formData.firstName.trim() || null,
-        lastName: formData.lastName.trim() || null
+        password: formData.password
       });
       showSuccess('Registration successful! Welcome to Smart Email Assistant.');
     } catch (error) {
@@ -91,41 +91,6 @@ const Register = () => {
   return (
     <div className="auth-form-container">
       <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="firstName" className="form-label">
-              First Name (Optional)
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Enter your first name"
-              disabled={loading}
-              autoComplete="given-name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="lastName" className="form-label">
-              Last Name (Optional)
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Enter your last name"
-              disabled={loading}
-              autoComplete="family-name"
-            />
-          </div>
-        </div>
 
         <div className="form-group">
           <label htmlFor="username" className="form-label">
@@ -191,17 +156,28 @@ const Register = () => {
           <label htmlFor="confirmPassword" className="form-label">
             Confirm Password *
           </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-            placeholder="Confirm your password"
-            disabled={loading}
-            autoComplete="new-password"
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+              placeholder="Confirm your password"
+              disabled={loading}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              tabIndex="-1"
+            >
+              <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
+          </div>
           {errors.confirmPassword && (
             <div className="form-error">{errors.confirmPassword}</div>
           )}

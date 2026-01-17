@@ -24,3 +24,7 @@ dist/
 # other
 npm-debug.log
 yarn-error.log
+
+# Interview notes (local only)
+INTERVIEW_NOTES.md
+INTERVIEW_NOTES_SHORT.md

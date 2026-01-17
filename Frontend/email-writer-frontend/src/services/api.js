@@ -72,14 +72,29 @@ class ApiService {
 
   // POST request
   async post(endpoint, data = {}, options = {}) {
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: 'POST',
-      headers: this.getHeaders(options.includeAuth !== false),
-      body: JSON.stringify(data),
-      ...options
-    });
+    // Setup timeout if specified
+    const controller = new AbortController();
+    const timeout = options.timeout || 40000; // Default 40s timeout
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    return this.handleResponse(response);
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers: this.getHeaders(options.includeAuth !== false),
+        body: JSON.stringify(data),
+        signal: controller.signal,
+        ...options
+      });
+
+      clearTimeout(timeoutId);
+      return this.handleResponse(response);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please try again.');
+      }
+      throw error;
+    }
   }
 
   // PUT request

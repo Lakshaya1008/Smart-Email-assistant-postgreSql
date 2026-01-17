@@ -14,6 +14,13 @@ const EmailGenerator = ({ onReplyGenerated }) => {
 
   const handleGenerateReplies = async (emailData) => {
     setLoading(true);
+    setColdStart(false);
+
+    // Show cold start message after 7 seconds
+    const coldStartTimer = setTimeout(() => {
+      setColdStart(true);
+    }, 7000);
+
     try {
       const response = await emailService.generateReplies(emailData);
       setReplies(response);
@@ -27,7 +34,9 @@ const EmailGenerator = ({ onReplyGenerated }) => {
       showError(error.message);
       setReplies(null);
     } finally {
+      clearTimeout(coldStartTimer);
       setLoading(false);
+      setColdStart(false);
     }
   };
 
@@ -82,6 +91,12 @@ const EmailGenerator = ({ onReplyGenerated }) => {
             <p className="loading-message">
               Our AI is crafting personalized responses for you. This may take a few moments.
             </p>
+            {coldStart && (
+              <div className="cold-start-message">
+                <i className="fas fa-clock"></i>
+                <span>Waking up the server… This may take a few seconds.</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -89,6 +104,7 @@ const EmailGenerator = ({ onReplyGenerated }) => {
           <div className="generator-results-section">
             <EmailReplies
               replies={replies}
+              originalEmail={lastRequest}
               onRegenerate={handleRegenerateReplies}
               onClear={handleClearReplies}
               canRegenerate={!!lastRequest}

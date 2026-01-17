@@ -52,6 +52,13 @@ const Login = () => {
     }
 
     setLoading(true);
+    setColdStart(false);
+
+    // Show cold start message after 7 seconds
+    const coldStartTimer = setTimeout(() => {
+      setColdStart(true);
+    }, 7000);
+
     try {
       await login({
         username: formData.username.trim(),
@@ -61,7 +68,9 @@ const Login = () => {
     } catch (error) {
       showError(error.message || 'Login failed. Please check your credentials.');
     } finally {
+      clearTimeout(coldStartTimer);
       setLoading(false);
+      setColdStart(false);
     }
   };
 
@@ -92,21 +101,39 @@ const Login = () => {
           <label htmlFor="password" className="form-label">
             Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`form-input ${errors.password ? 'error' : ''}`}
-            placeholder="Enter your password"
-            disabled={loading}
-            autoComplete="current-password"
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              placeholder="Enter your password"
+              disabled={loading}
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex="-1"
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
+          </div>
           {errors.password && (
             <div className="form-error">{errors.password}</div>
           )}
         </div>
+
+        {coldStart && (
+          <div className="cold-start-message">
+            <i className="fas fa-clock"></i>
+            <span>Waking up the server… This may take a few seconds.</span>
+          </div>
+        )}
 
         <button
           type="submit"

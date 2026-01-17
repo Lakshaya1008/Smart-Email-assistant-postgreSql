@@ -44,9 +44,10 @@ const EmailReplies = ({ replies, onRegenerate, onClear, canRegenerate, loading }
     setSavingIndex(index);
     try {
       await replyService.saveReply({
-        emailSubject: 'Generated Reply',
-        emailContent: 'Original email content',
-        tone: 'professional',
+        emailSubject: originalEmail?.subject || 'Generated Reply',
+        emailContent: originalEmail?.emailContent || '',
+        tone: originalEmail?.tone || 'professional',
+        language: originalEmail?.language || 'en',
         replyText: reply,
         summary: replies.summary
       });
