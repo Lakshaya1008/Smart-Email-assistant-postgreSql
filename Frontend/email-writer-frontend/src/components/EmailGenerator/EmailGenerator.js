@@ -11,6 +11,7 @@ const EmailGenerator = ({ onReplyGenerated }) => {
   const [loading, setLoading] = useState(false);
   const [replies, setReplies] = useState(null);
   const [lastRequest, setLastRequest] = useState(null);
+  const [coldStart, setColdStart] = useState(false);
 
   const handleGenerateReplies = async (emailData) => {
     setLoading(true);

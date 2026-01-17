@@ -12,6 +12,7 @@ const SavedReplies = ({ onReplyUpdated }) => {
   const { showError, showSuccess } = useNotification();
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [coldStart, setColdStart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     tone: '',

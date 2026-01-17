@@ -14,6 +14,8 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [coldStart, setColdStart] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
