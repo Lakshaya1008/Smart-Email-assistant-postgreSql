@@ -73,6 +73,13 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
 
   if (!replies) return null;
 
+  console.log('=== EMAILREPLIES COMPONENT DEBUG ===');
+  console.log('Replies object:', replies);
+  console.log('Summary received in component:', replies.summary);
+  console.log('Summary length in component:', replies.summary?.length);
+  console.log('Truncated summary (200 chars):', truncateText(replies.summary, 200));
+  console.log('====================================');
+
   return (
     <div className="email-replies">
       {/* Email Summary Section */}
@@ -112,7 +119,7 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
               <span className="reply-length">{replies.summary.split(' ').length} words</span>
               <span className="reply-chars">{replies.summary.length} characters</span>
             </div>
-            {replies.summary && replies.summary.length > 200 && (
+            {replies.summary && replies.summary.length > 180 && (
               <button
                 onClick={openSummaryModal}
                 className="btn btn-outline btn-small"

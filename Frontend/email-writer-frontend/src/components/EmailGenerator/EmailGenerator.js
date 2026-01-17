@@ -24,6 +24,12 @@ const EmailGenerator = ({ onReplyGenerated }) => {
 
     try {
       const response = await emailService.generateReplies(emailData);
+      console.log('=== BACKEND RESPONSE DEBUG ===');
+      console.log('Full response:', response);
+      console.log('Summary from backend:', response.summary);
+      console.log('Summary length from backend:', response.summary?.length);
+      console.log('Summary word count:', response.summary?.split(' ').length);
+      console.log('==============================');
       setReplies(response);
       setLastRequest(emailData);
       showSuccess('Email replies generated successfully!');
