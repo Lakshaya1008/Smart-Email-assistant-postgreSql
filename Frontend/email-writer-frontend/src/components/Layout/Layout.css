@@ -494,6 +494,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 73px);
+  background: var(--bg-primary);
 }
 
 .main-header {
@@ -546,10 +547,13 @@
 
 .content-container {
   padding: var(--spacing-lg);
+  padding-bottom: var(--spacing-3xl);
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   flex: 1;
+  background: var(--bg-primary);
+  min-height: 100%;
 }
 
 /* Mobile Responsive */
@@ -640,6 +644,7 @@
   
   .content-container {
     padding: var(--spacing-sm);
+    padding-bottom: var(--spacing-xl);
   }
   
   .sidebar-content {
