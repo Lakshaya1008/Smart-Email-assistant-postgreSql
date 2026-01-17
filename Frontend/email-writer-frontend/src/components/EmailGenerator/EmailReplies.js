@@ -73,12 +73,6 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
 
   if (!replies) return null;
 
-  console.log('=== EMAILREPLIES COMPONENT DEBUG ===');
-  console.log('Replies object:', replies);
-  console.log('Summary received in component:', replies.summary);
-  console.log('Summary length in component:', replies.summary?.length);
-  console.log('Truncated summary (200 chars):', truncateText(replies.summary, 200));
-  console.log('====================================');
 
   return (
     <div className="email-replies">
