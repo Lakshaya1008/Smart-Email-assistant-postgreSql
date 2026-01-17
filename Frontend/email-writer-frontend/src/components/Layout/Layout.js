@@ -78,10 +78,10 @@ const Layout = ({ currentView, onViewChange, children, onStatsRefresh }) => {
                     <i className="fab fa-linkedin"></i>
                     <span>LinkedIn</span>
                   </a>
-                  <a href="mailto:lakshayajain93@gmail.com" className="footer-link">
+                  <button onClick={handleEmailClick} className="footer-link footer-link-button">
                     <i className="fas fa-envelope"></i>
                     <span>Email</span>
-                  </a>
+                  </button>
                 </div>
               </div>
 

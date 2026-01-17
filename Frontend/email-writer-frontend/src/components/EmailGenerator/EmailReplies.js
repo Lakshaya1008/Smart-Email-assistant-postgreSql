@@ -270,7 +270,7 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
                 Copy to Clipboard
               </button>
             </div>
-          </div>
+should           </div>
         </Modal>
       )}
     </div>
