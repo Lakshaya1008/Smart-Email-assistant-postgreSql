@@ -10,10 +10,21 @@ export const useTheme = () => {
   });
 
   useEffect(() => {
-    // Apply theme to document
-    document.documentElement.setAttribute('data-theme', theme);
+    // Apply theme to document root element
+    const root = document.documentElement;
+
+    // Remove any existing theme attribute first
+    root.removeAttribute('data-theme');
+
+    // Apply new theme
+    root.setAttribute('data-theme', theme);
+
+    // Also apply to body for better coverage
+    document.body.setAttribute('data-theme', theme);
+
     // Save to localStorage
     localStorage.setItem(THEME_STORAGE_KEY, theme);
+
   }, [theme]);
 
   const toggleTheme = () => {

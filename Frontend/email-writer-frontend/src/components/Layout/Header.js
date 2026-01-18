@@ -89,9 +89,13 @@ const Header = ({ onViewChange }) => {
                     <div className="user-menu-items">
                       <button
                           className="user-menu-item"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             toggleTheme();
-                            setShowUserMenu(false);
+                            // Don't close menu immediately so user sees the change
+                            setTimeout(() => {
+                              setShowUserMenu(false);
+                            }, 300);
                           }}
                       >
                         <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
