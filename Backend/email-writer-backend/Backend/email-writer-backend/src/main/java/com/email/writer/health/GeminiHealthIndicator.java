@@ -24,9 +24,9 @@ public class GeminiHealthIndicator implements HealthIndicator {
     @Override
     public Health health() {
         try {
-            String url = geminiApiUrl + geminiApiEndpoint;
+            // Use the real API call format: endpoint + ?key=API_KEY
+            String url = geminiApiUrl + geminiApiEndpoint + "?key=" + geminiApiKey;
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + geminiApiKey);
             headers.setContentType(MediaType.APPLICATION_JSON);
             // Minimal valid payload for Gemini
             String payload = "{\"contents\":[{\"parts\":[{\"text\":\"ping\"}]}]}";
