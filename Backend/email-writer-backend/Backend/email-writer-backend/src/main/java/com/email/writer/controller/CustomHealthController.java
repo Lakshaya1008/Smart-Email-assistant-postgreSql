@@ -32,7 +32,6 @@ public class CustomHealthController {
                 String key = entry.getKey();
                 String mappedKey = key;
                 if (key.equalsIgnoreCase("db")) mappedKey = "database";
-                if (key.equalsIgnoreCase("geminiHealthIndicator")) mappedKey = "gemini";
                 if (key.equalsIgnoreCase("authHealthIndicator")) mappedKey = "auth";
                 String status = "UNKNOWN";
                 Object value = entry.getValue();
