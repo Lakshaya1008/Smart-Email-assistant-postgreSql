@@ -1,7 +1,6 @@
 package com.email.writer.controller;
 
 import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthComponent;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,35 +20,39 @@ public class CustomHealthController {
 
     @GetMapping("/custom-health")
     public ResponseEntity<Map<String, Object>> health() {
-        HealthComponent healthComponent = healthEndpoint.health();
-        String status = (healthComponent instanceof Health h) ? h.getStatus().getCode() : "UNKNOWN";
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", status);
+        Health health = (Health) healthEndpoint.health();
+        Map<String, String> services = new LinkedHashMap<>();
+        String overallStatus = "UP";
+        boolean anyDegraded = false;
+        boolean anyDown = false;
 
-        Map<String, String> checks = new LinkedHashMap<>();
-        if (healthComponent instanceof Health h && h.getDetails() != null) {
-            for (Map.Entry<String, Object> entry : h.getDetails().entrySet()) {
+        // Map actuator component names to your desired keys
+        if (health.getDetails() != null) {
+            for (Map.Entry<String, Object> entry : health.getDetails().entrySet()) {
+                String key = entry.getKey();
+                String mappedKey = key;
+                if (key.equalsIgnoreCase("db")) mappedKey = "database";
+                if (key.equalsIgnoreCase("geminiHealthIndicator")) mappedKey = "gemini";
+                if (key.equalsIgnoreCase("authHealthIndicator")) mappedKey = "auth";
+                String status = "UNKNOWN";
                 Object value = entry.getValue();
-                if (value instanceof HealthComponent hc) {
-                    if (hc instanceof Health subHealth) {
-                        checks.put(entry.getKey(), subHealth.getStatus().getCode());
-                    }
-                } else if (value instanceof Map<?, ?> map) {
+                if (value instanceof Map<?, ?> map) {
                     Object st = map.get("status");
-                    if (st != null) {
-                        checks.put(entry.getKey(), st.toString());
-                    }
+                    if (st != null) status = st.toString();
                 }
+                services.put(mappedKey, status);
+                if (status.equalsIgnoreCase("DEGRADED")) anyDegraded = true;
+                if (status.equalsIgnoreCase("DOWN")) anyDown = true;
             }
         }
-        response.put("checks", checks);
+        if (anyDown) overallStatus = "DOWN";
+        else if (anyDegraded) overallStatus = "DEGRADED";
 
-        // If any check is DOWN, set status to DEGRADED and HTTP 503
-        boolean anyDown = checks.values().stream().anyMatch(v -> v.equalsIgnoreCase("DOWN"));
-        if (anyDown) {
-            response.put("status", "DEGRADED");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
-        }
-        return ResponseEntity.ok(response);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", overallStatus);
+        response.put("services", services);
+
+        HttpStatus httpStatus = overallStatus.equals("UP") ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
+        return ResponseEntity.status(httpStatus).body(response);
     }
 }
