@@ -2,10 +2,7 @@ package com.email.writer.health;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 public class GeminiHealthIndicator implements HealthIndicator {
     private final RestTemplate restTemplate;
     @Value("${gemini.api.url}")
-    private String geminiUrl;
+    private String geminiApiUrl;
+    @Value("${gemini.api.endpoint}")
+    private String geminiApiEndpoint;
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
@@ -25,10 +24,14 @@ public class GeminiHealthIndicator implements HealthIndicator {
     @Override
     public Health health() {
         try {
+            String url = geminiApiUrl + geminiApiEndpoint;
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + geminiApiKey);
-            RequestEntity<Void> request = RequestEntity.head(geminiUrl).headers(headers).build();
-            ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            // Minimal valid payload for Gemini
+            String payload = "{\"contents\":[{\"parts\":[{\"text\":\"ping\"}]}]}";
+            HttpEntity<String> request = new HttpEntity<>(payload, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 return Health.up().build();
             } else if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
