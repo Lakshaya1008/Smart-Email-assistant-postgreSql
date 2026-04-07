@@ -204,7 +204,6 @@ public class EmailGeneratorService {
             if (replies.size() > 3)  replies = replies.subList(0, 3);
             if (summary.isEmpty())   summary = "Generated professional email responses based on the provided content.";
             summary = summary.trim();
-            if (summary.length() > 200) summary = summary.substring(0, 197) + "...";
 
             return Map.of("replies", replies, "summary", summary);
 
