@@ -13,86 +13,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * Authentication endpoints (register/login).
- * Returns JWT tokens on success.
+ * Authentication endpoints — versioned at /api/v1/auth.
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Slf4j
 public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * Register a new user.
-     *
-     * Request Body (JSON):
-     * {
-     *   "username": "string (3-50 chars, required, unique)",
-     *   "email": "string (valid email, required, unique)",
-     *   "password": "string (min 6 chars, required)",
-     *   "firstName": "string (optional)",
-     *   "lastName": "string (optional)"
-     * }
-     *
-     * Field requirements:
-     * - username: Required, 3-50 characters, must be unique.
-     * - email: Required, must be a valid email, must be unique.
-     * - password: Required, minimum 6 characters.
-     * - firstName: Optional.
-     * - lastName: Optional.
-     *
-     * @param request RegisterRequest JSON body
-     * @return 200 OK with AuthResponse on success, 400 Bad Request with error details on failure
-     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        try {
-            AuthResponse res = authService.register(request);
-            return ResponseEntity.ok(res);
-        } catch (Exception ex) {
-            log.warn("Registration failed: {}", ex.getMessage());
-            // Error: Registration failed (validation, duplicate, etc.)
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "registration_failed",
-                "message", "Registration failed.",
-                "reason", ex.getMessage()
-            ));
-        }
+        log.info("Register attempt for username: {}", request.getUsername());
+        AuthResponse res = authService.register(request);
+        return ResponseEntity.ok(res);
     }
 
-    /**
-     * Login with username and password.
-     *
-     * Request Body (JSON):
-     * {
-     *   "username": "string (required)",
-     *   "password": "string (required)"
-     * }
-     *
-     * Field requirements:
-     * - username: Required.
-     * - password: Required.
-     *
-     * @param request LoginRequest JSON body
-     * @return 200 OK with AuthResponse on success, 400 Bad Request with error details on failure
-     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            AuthResponse res = authService.login(request);
-            return ResponseEntity.ok(res);
-        } catch (Exception ex) {
-            log.warn("Login failed for {}: {}", request.getUsername(), ex.getMessage());
-            // Error: Login failed (invalid credentials, user not found, etc.)
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "login_failed",
-                "message", "Login failed.",
-                "reason", ex.getMessage()
-            ));
-        }
+        log.info("Login attempt for username: {}", request.getUsername());
+        AuthResponse res = authService.login(request);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/test")

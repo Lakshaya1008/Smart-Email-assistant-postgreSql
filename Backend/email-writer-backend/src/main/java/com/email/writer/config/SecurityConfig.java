@@ -2,8 +2,10 @@ package com.email.writer.config;
 
 import com.email.writer.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,35 +18,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Spring Security configuration for JWT + CORS (Spring Security 6.2+).
- *
- * This configuration class sets up security filters, CORS settings, and authentication providers.
- * It enables method-level security and configures stateless session management for JWT-based authentication.
- *
- * Key Features:
- * - CORS configuration to allow requests from specified origins.
- * - Disables CSRF protection as JWT is used for stateless authentication.
- * - Permits unauthenticated access to specific endpoints (e.g., /api/auth/**).
- * - Secures all other endpoints, requiring authentication.
- * - Configures a custom JWT authentication filter to validate tokens.
- * - Uses BCrypt for password encoding.
- *
- * Note: Ensure that the JwtAuthenticationFilter and UserDetailsService are properly implemented
- * to handle JWT validation and user retrieval respectively.
- *
- * @version 1.0
- * @since 2024-06-01
- * @see JwtAuthenticationFilter
- * @see UserDetailsService
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -54,19 +36,35 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
+    @Value("${cors.allowed-origins:}")
+    private String corsAllowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/email/test").permitAll()
+                        // Auth endpoints — public (v1)
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Email test + lightweight ping — public (safe for cron job pings)
+                        .requestMatchers("/api/v1/email/test").permitAll()
+                        .requestMatchers("/api/v1/email/ping").permitAll()
+                        // Actuator + custom health — public (Render health checks + cron)
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/custom-health").permitAll()
+                        // Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Everything else requires JWT
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider()) // ✅ updated bean
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -75,7 +73,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:3001"));
+
+        List<String> origins = new ArrayList<>(List.of(
+                "http://localhost:3000",
+                "http://localhost:3001"
+        ));
+
+        if (corsAllowedOrigins != null && !corsAllowedOrigins.isBlank()) {
+            for (String origin : corsAllowedOrigins.split(",")) {
+                String trimmed = origin.trim();
+                if (!trimmed.isEmpty()) origins.add(trimmed);
+            }
+        }
+
+        cfg.setAllowedOriginPatterns(origins);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
@@ -85,9 +96,6 @@ public class SecurityConfig {
         return src;
     }
 
-    /**
-     * Replace deprecated DaoAuthenticationProvider + setUserDetailsService
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -96,9 +104,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    /**
-     * Use AuthenticationConfiguration to expose AuthenticationManager.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

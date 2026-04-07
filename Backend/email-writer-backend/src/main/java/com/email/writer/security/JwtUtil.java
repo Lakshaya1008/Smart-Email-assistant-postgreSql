@@ -13,7 +13,10 @@ import java.util.function.Function;
 
 /**
  * Utility class for creating and validating JWT tokens (jjwt).
- * Keep secret and expiration configured in application.properties.
+ *
+ * Removed: generateToken(Map<String, Object> extraClaims, String subject)
+ * overload — was never called anywhere in the codebase. Dead code.
+ * The single-arg generateToken(UserDetails) is the only one used.
  */
 @Component
 public class JwtUtil {
@@ -55,10 +58,6 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         return createToken(Map.of(), userDetails.getUsername());
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, String subject) {
-        return createToken(extraClaims, subject);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

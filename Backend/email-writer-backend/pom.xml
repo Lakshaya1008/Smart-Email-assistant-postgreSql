@@ -22,17 +22,18 @@
     </properties>
 
     <dependencies>
-        <!-- Web -->
+        <!-- Web (includes RestTemplate via RestTemplateBuilder) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- WebClient for Gemini -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+        <!--
+            WebFlux REMOVED. It was imported solely to use WebClient, which was
+            then immediately blocked with .block() — zero reactive benefit.
+            RestTemplate from spring-boot-starter-web is simpler and honest
+            about being synchronous. No behaviour change for the user.
+        -->
 
         <!-- Data / JPA -->
         <dependency>
@@ -50,6 +51,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Actuator — exposes /actuator/health for Render health checks -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!-- PostgreSQL Connector -->
@@ -100,7 +107,6 @@
 
     <build>
         <plugins>
-            <!-- Compiler plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -116,7 +122,6 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
