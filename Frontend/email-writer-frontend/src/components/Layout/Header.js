@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../hooks/useNotification';
 import { useTheme } from '../../hooks/useTheme';
@@ -6,12 +6,30 @@ import { formatName } from '../../utils/helpers';
 import Modal from '../Common/Modal';
 import './Layout.css';
 
-const Header = ({ onViewChange }) => {
+// currentView was previously passed as a prop but never destructured — dead prop.
+// Now destructured so Header can show the active view state if needed in future.
+const Header = ({ currentView, onViewChange }) => {
   const { user, logout } = useAuth();
   const { showSuccess } = useNotification();
   const { theme, toggleTheme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const menuContainerRef = useRef(null);
+
+  // Close dropdown when clicking outside — previously only worked on mobile
+  // via the mobile-overlay div. On desktop, clicking outside had no effect.
+  useEffect(() => {
+    if (!showUserMenu) return;
+
+    const handleClickOutside = (e) => {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
 
   const handleLogout = () => {
     logout();
@@ -30,7 +48,8 @@ const Header = ({ onViewChange }) => {
           </div>
 
           <div className="header-user">
-            <div className="user-menu-container">
+            {/* ref attached so the outside-click handler knows the menu boundary */}
+            <div className="user-menu-container" ref={menuContainerRef}>
               <button
                   className="user-menu-trigger"
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -63,10 +82,7 @@ const Header = ({ onViewChange }) => {
                     <div className="user-menu-items">
                       <button
                           className="user-menu-item"
-                          onClick={() => {
-                            onViewChange('statistics');
-                            setShowUserMenu(false);
-                          }}
+                          onClick={() => { onViewChange('statistics'); setShowUserMenu(false); }}
                       >
                         <i className="fas fa-chart-bar"></i>
                         View Statistics
@@ -74,10 +90,7 @@ const Header = ({ onViewChange }) => {
 
                       <button
                           className="user-menu-item"
-                          onClick={() => {
-                            onViewChange('saved');
-                            setShowUserMenu(false);
-                          }}
+                          onClick={() => { onViewChange('saved'); setShowUserMenu(false); }}
                       >
                         <i className="fas fa-bookmark"></i>
                         Saved Replies
@@ -92,10 +105,7 @@ const Header = ({ onViewChange }) => {
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleTheme();
-                            // Don't close menu immediately so user sees the change
-                            setTimeout(() => {
-                              setShowUserMenu(false);
-                            }, 300);
+                            setTimeout(() => setShowUserMenu(false), 300);
                           }}
                       >
                         <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
@@ -104,10 +114,7 @@ const Header = ({ onViewChange }) => {
 
                       <button
                           className="user-menu-item"
-                          onClick={() => {
-                            setShowAbout(true);
-                            setShowUserMenu(false);
-                          }}
+                          onClick={() => { setShowAbout(true); setShowUserMenu(false); }}
                       >
                         <i className="fas fa-info-circle"></i>
                         About
@@ -117,10 +124,7 @@ const Header = ({ onViewChange }) => {
                     <div className="user-menu-divider"></div>
 
                     <div className="user-menu-items">
-                      <button
-                          className="user-menu-item danger"
-                          onClick={handleLogout}
-                      >
+                      <button className="user-menu-item danger" onClick={handleLogout}>
                         <i className="fas fa-sign-out-alt"></i>
                         Sign Out
                       </button>
@@ -131,15 +135,7 @@ const Header = ({ onViewChange }) => {
           </div>
         </div>
 
-        {/* Mobile Overlay */}
-        {showUserMenu && (
-            <div
-                className="mobile-overlay"
-                onClick={() => setShowUserMenu(false)}
-            ></div>
-        )}
-
-        {/* About Modal */}
+        {/* About Modal — personal email removed (issue N10: privacy concern on public app) */}
         {showAbout && (
             <Modal
                 isOpen={true}
@@ -184,14 +180,6 @@ const Header = ({ onViewChange }) => {
                     >
                       <i className="fab fa-linkedin"></i>
                       LinkedIn
-                    </a>
-
-                    <a
-                        href="mailto:lakshayajain93@gmail.com"
-                        className="about-link"
-                    >
-                      <i className="fas fa-envelope"></i>
-                      Email
                     </a>
                   </div>
                 </div>

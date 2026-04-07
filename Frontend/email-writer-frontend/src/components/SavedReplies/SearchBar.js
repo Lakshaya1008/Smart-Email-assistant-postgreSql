@@ -12,44 +12,48 @@ const SearchBar = ({ value, onChange, placeholder = "Search..." }) => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
+      // Clear the search query and blur — standard UX for search inputs.
+      // Previously only blurred without clearing, leaving results filtered
+      // with no visible query in the input.
+      onChange('');
       inputRef.current?.blur();
     }
   };
 
   return (
-    <div className={`search-bar ${isFocused ? 'focused' : ''}`}>
-      <div className="search-input-container">
-        <i className="fas fa-search search-icon"></i>
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="search-input"
-        />
+      <div className={`search-bar ${isFocused ? 'focused' : ''}`}>
+        <div className="search-input-container">
+          <i className="fas fa-search search-icon"></i>
+          <input
+              ref={inputRef}
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className="search-input"
+          />
+          {value && (
+              <button
+                  onClick={handleClear}
+                  className="search-clear"
+                  type="button"
+                  title="Clear search"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+          )}
+        </div>
+
         {value && (
-          <button
-            onClick={handleClear}
-            className="search-clear"
-            type="button"
-            title="Clear search"
-          >
-            <i className="fas fa-times"></i>
-          </button>
+            <div className="search-status">
+              <i className="fas fa-search"></i>
+              <span>Searching for "{value}"</span>
+            </div>
         )}
       </div>
-      
-      {value && (
-        <div className="search-status">
-          <i className="fas fa-search"></i>
-          <span>Searching for "{value}"</span>
-        </div>
-      )}
-    </div>
   );
 };
 

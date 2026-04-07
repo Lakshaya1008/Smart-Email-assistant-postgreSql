@@ -4,7 +4,6 @@ import { rateLimiter } from '../../utils/rateLimiter';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import './EmailGenerator.css';
 
-
 const EmailForm = ({ onGenerate, loading }) => {
   const [formData, setFormData] = useState({
     subject: '',
@@ -18,18 +17,13 @@ const EmailForm = ({ onGenerate, loading }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-    // Update rate limit check when content changes
-    if (name === 'emailContent' || name === 'subject') {
-      const canRequest = rateLimiter.canMakeRequest(
-        name === 'emailContent' ? value : formData.emailContent,
-        name === 'subject' ? value : formData.subject
-      );
-      setRateLimitStatus(canRequest);
-    }
+    // Rate limiter check removed from here — it was being called on every
+    // single keystroke (issue #35). canMakeRequest() iterates arrays, filters
+    // by date, and estimates tokens — unnecessary work + re-render on every
+    // character. Now called only on submit where it actually matters.
   };
 
   const validateForm = () => {
@@ -53,32 +47,24 @@ const EmailForm = ({ onGenerate, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
-    // Final rate limit check
+    if (!validateForm()) return;
+
+    // Rate limit check happens once here at submit time — correct placement
     const canRequest = rateLimiter.canMakeRequest(formData.emailContent, formData.subject);
-    if (!canRequest.canProceed) {
-      setRateLimitStatus(canRequest);
-      return;
-    }
-    // Record the request
+    setRateLimitStatus(canRequest);
+    if (!canRequest.canProceed) return;
+
     rateLimiter.recordRequest(formData.emailContent, formData.subject);
     onGenerate({
-      subject: formData.subject.trim(),
+      subject:      formData.subject.trim(),
       emailContent: formData.emailContent.trim(),
-      tone: formData.tone,
-      language: formData.language
+      tone:         formData.tone,
+      language:     formData.language
     });
   };
 
   const handleClear = () => {
-    setFormData({
-      subject: '',
-      emailContent: '',
-      tone: 'professional',
-      language: 'en'
-    });
+    setFormData({ subject: '', emailContent: '', tone: 'professional', language: 'en' });
     setErrors({});
     setRateLimitStatus(null);
   };
@@ -87,22 +73,13 @@ const EmailForm = ({ onGenerate, loading }) => {
     if (!rateLimitStatus || rateLimitStatus.canProceed) return null;
     const { reasons, timeUntilReset } = rateLimitStatus;
     if (reasons.dailyLimitReached) {
-      return {
-        type: 'error',
-        message: `Daily API limit reached (200 requests). Resets in ${timeUntilReset.daily} hours.`
-      };
+      return { type: 'error', message: `Daily API limit reached (200 requests). Resets in ${timeUntilReset.daily} hours.` };
     }
     if (reasons.rateLimited) {
-      return {
-        type: 'warning',
-        message: `Rate limit reached (8 requests per minute). Please wait ${Math.ceil(timeUntilReset.minute)} seconds.`
-      };
+      return { type: 'warning', message: `Rate limit reached (8 requests per minute). Please wait ${Math.ceil(timeUntilReset.minute)} seconds.` };
     }
     if (reasons.tokenLimitReached) {
-      return {
-        type: 'warning',
-        message: `Token limit reached. Please shorten your email content or wait ${Math.ceil(timeUntilReset.minute)} seconds.`
-      };
+      return { type: 'warning', message: `Token limit reached. Please shorten your email content or wait ${Math.ceil(timeUntilReset.minute)} seconds.` };
     }
     return null;
   };
@@ -111,147 +88,107 @@ const EmailForm = ({ onGenerate, loading }) => {
   const canSubmit = !loading && (!rateLimitStatus || rateLimitStatus.canProceed);
 
   return (
-    <div className="email-form-container">
-      <div className="form-header">
-        <h2 className="form-title">
-          <i className="fas fa-envelope"></i>
-          Original Email
-        </h2>
-        <p className="form-description">
-          Paste the email you want to respond to, and we'll generate multiple reply options.
-        </p>
+      <div className="email-form-container">
+        <div className="form-header">
+          <h2 className="form-title">
+            <i className="fas fa-envelope"></i>
+            Original Email
+          </h2>
+          <p className="form-description">
+            Paste the email you want to respond to, and we'll generate multiple reply options.
+          </p>
+        </div>
+
+        {warning && (
+            <div className={`rate-limit-warning ${warning.type}`}>
+              <i className={`fas ${warning.type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}`}></i>
+              <span>{warning.message}</span>
+            </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="email-form">
+          <div className="form-group">
+            <label htmlFor="subject" className="form-label">Email Subject</label>
+            <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                className={`form-input ${errors.subject ? 'error' : ''}`}
+                placeholder="e.g., Meeting Request, Project Update, Follow-up..."
+                disabled={loading}
+                maxLength="100"
+            />
+            {errors.subject && <div className="form-error">{errors.subject}</div>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="emailContent" className="form-label">
+              Email Content
+              <span className="char-counter">{formData.emailContent.length}/2000 characters</span>
+            </label>
+            <textarea
+                id="emailContent"
+                name="emailContent"
+                value={formData.emailContent}
+                onChange={handleChange}
+                className={`form-input form-textarea ${errors.emailContent ? 'error' : ''}`}
+                placeholder="Paste the original email content here..."
+                rows="6"
+                disabled={loading}
+                maxLength="2000"
+            />
+            {errors.emailContent && <div className="form-error">{errors.emailContent}</div>}
+            <div className="form-hint">
+              <i className="fas fa-info-circle"></i>
+              Keep content under 2000 characters
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="tone" className="form-label">Reply Tone</label>
+              <select id="tone" name="tone" value={formData.tone} onChange={handleChange}
+                      className="form-select" disabled={loading}>
+                {EMAIL_TONES.map(tone => (
+                    <option key={tone.value} value={tone.value}>{tone.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="language" className="form-label">Language</label>
+              <select id="language" name="language" value={formData.language} onChange={handleChange}
+                      className="form-select" disabled={loading}>
+                {LANGUAGE_OPTIONS.map(lang => (
+                    <option key={lang.value} value={lang.value}>{lang.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" onClick={handleClear} className="btn btn-secondary" disabled={loading}>
+              <i className="fas fa-eraser"></i>
+              Clear
+            </button>
+
+            <button
+                type="submit"
+                className="btn btn-primary btn-large"
+                disabled={!canSubmit}
+                title={!canSubmit && rateLimitStatus ? warning?.message : ''}
+            >
+              {loading ? (
+                  <><LoadingSpinner size="small" />Generating...</>
+              ) : (
+                  <><i className="fas fa-magic"></i>Generate Replies</>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Rate Limit Warning */}
-      {warning && (
-        <div className={`rate-limit-warning ${warning.type}`}>
-          <i className={`fas ${warning.type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}`}></i>
-          <span>{warning.message}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="email-form">
-        <div className="form-group">
-          <label htmlFor="subject" className="form-label">
-            Email Subject
-          </label>
-          <input
-            type="text"
-            id="subject"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            className={`form-input ${errors.subject ? 'error' : ''}`}
-            placeholder="e.g., Meeting Request, Project Update, Follow-up..."
-            disabled={loading}
-            maxLength="100"
-          />
-          {errors.subject && (
-            <div className="form-error">{errors.subject}</div>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="emailContent" className="form-label">
-            Email Content
-            <span className="char-counter">
-              {formData.emailContent.length}/2000 characters
-            </span>
-          </label>
-          <textarea
-            id="emailContent"
-            name="emailContent"
-            value={formData.emailContent}
-            onChange={handleChange}
-            className={`form-input form-textarea ${errors.emailContent ? 'error' : ''}`}
-            placeholder="Paste the original email content here..."
-            rows="6"
-            disabled={loading}
-            maxLength="2000"
-          />
-          {errors.emailContent && (
-            <div className="form-error">{errors.emailContent}</div>
-          )}
-          <div className="form-hint">
-            <i className="fas fa-info-circle"></i>
-            Keep content under 2000 characters
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="tone" className="form-label">
-              Reply Tone
-            </label>
-            <select
-              id="tone"
-              name="tone"
-              value={formData.tone}
-              onChange={handleChange}
-              className="form-select"
-              disabled={loading}
-            >
-              {EMAIL_TONES.map(tone => (
-                <option key={tone.value} value={tone.value}>
-                  {tone.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="language" className="form-label">
-              Language
-            </label>
-            <select
-              id="language"
-              name="language"
-              value={formData.language}
-              onChange={handleChange}
-              className="form-select"
-              disabled={loading}
-            >
-              {LANGUAGE_OPTIONS.map(lang => (
-                <option key={lang.value} value={lang.value}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="form-actions">
-          <button
-            type="button"
-            onClick={handleClear}
-            className="btn btn-secondary"
-            disabled={loading}
-          >
-            <i className="fas fa-eraser"></i>
-            Clear
-          </button>
-          
-          <button
-            type="submit"
-            className="btn btn-primary btn-large"
-            disabled={!canSubmit}
-            title={!canSubmit && rateLimitStatus ? warning?.message : ''}
-          >
-            {loading ? (
-              <>
-                <LoadingSpinner size="small" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-magic"></i>
-                Generate Replies
-              </>
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
   );
 };
 

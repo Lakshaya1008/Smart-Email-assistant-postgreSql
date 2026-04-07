@@ -17,6 +17,13 @@
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-secondary) 100%);
 }
 
+/* Dark mode fix: var(--primary-light) becomes #1e3a8a (dark navy) and
+   var(--bg-secondary) becomes #1e293b — both near-black, gradient invisible.
+   Override with a visible dark background that still feels intentional. */
+[data-theme="dark"] .auth-container {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+}
+
 .auth-header {
   text-align: center;
   margin-bottom: var(--spacing-2xl);
@@ -97,20 +104,20 @@
   .auth-container {
     padding: var(--spacing-md);
   }
-  
+
   .auth-header h1 {
     font-size: var(--font-size-3xl);
   }
-  
+
   .auth-header p {
     font-size: var(--font-size-base);
   }
-  
+
   .auth-toggle {
     width: 100%;
     max-width: 300px;
   }
-  
+
   .auth-toggle button {
     flex: 1;
     min-width: unset;
@@ -121,11 +128,11 @@
   .auth-container {
     padding: var(--spacing-sm);
   }
-  
+
   .auth-header {
     margin-bottom: var(--spacing-xl);
   }
-  
+
   .auth-header h1 {
     font-size: var(--font-size-2xl);
   }

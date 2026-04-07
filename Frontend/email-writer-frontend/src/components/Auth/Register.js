@@ -9,6 +9,8 @@ const Register = () => {
   const { register } = useAuth();
   const { showError, showSuccess } = useNotification();
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
     username: '',
     email: '',
     password: '',
@@ -22,8 +24,6 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -32,28 +32,24 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Username validation
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (!validateUsername(formData.username)) {
       newErrors.username = 'Username must be 3-50 characters and contain only letters, numbers, and underscores';
     }
 
-    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (!validatePassword(formData.password)) {
       newErrors.password = 'Password must be at least 6 characters long';
     }
 
-    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
@@ -66,17 +62,17 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
       await register({
         username: formData.username.trim(),
         email: formData.email.trim().toLowerCase(),
-        password: formData.password
+        password: formData.password,
+        // Optional — backend accepts and stores them; now actually sent
+        firstName: formData.firstName.trim() || undefined,
+        lastName: formData.lastName.trim() || undefined
       });
       showSuccess('Registration successful! Welcome to Smart Email Assistant.');
     } catch (error) {
@@ -87,127 +83,164 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-form-container">
-      <form onSubmit={handleSubmit} className="auth-form">
+      <div className="auth-form-container">
+        <form onSubmit={handleSubmit} className="auth-form">
 
-        <div className="form-group">
-          <label htmlFor="username" className="form-label">
-            Username *
-          </label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className={`form-input ${errors.username ? 'error' : ''}`}
-            placeholder="Choose a username"
-            disabled={loading}
-            autoComplete="username"
-          />
-          {errors.username && (
-            <div className="form-error">{errors.username}</div>
-          )}
-        </div>
+          {/* First name + Last name — optional, side by side */}
+          <div className="form-row" style={{ display: 'flex', gap: '12px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="firstName" className="form-label">
+                First Name <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+              </label>
+              <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Enter your first name"
+                  disabled={loading}
+                  autoComplete="given-name"
+              />
+            </div>
 
-        <div className="form-group">
-          <label htmlFor="email" className="form-label">
-            Email Address *
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`form-input ${errors.email ? 'error' : ''}`}
-            placeholder="Enter your email address"
-            disabled={loading}
-            autoComplete="email"
-          />
-          {errors.email && (
-            <div className="form-error">{errors.email}</div>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
-            Password *
-          </label>
-          <div className="password-input-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`form-input ${errors.password ? 'error' : ''}`}
-              placeholder="Create a password"
-              disabled={loading}
-              autoComplete="new-password"
-            />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              tabIndex="-1"
-            >
-              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-            </button>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="lastName" className="form-label">
+                Last Name <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+              </label>
+              <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Enter your last name"
+                  disabled={loading}
+                  autoComplete="family-name"
+              />
+            </div>
           </div>
-          {errors.password && (
-            <div className="form-error">{errors.password}</div>
-          )}
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="confirmPassword" className="form-label">
-            Confirm Password *
-          </label>
-          <div className="password-input-wrapper">
+          <div className="form-group">
+            <label htmlFor="username" className="form-label">
+              Username *
+            </label>
             <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-              placeholder="Confirm your password"
-              disabled={loading}
-              autoComplete="new-password"
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className={`form-input ${errors.username ? 'error' : ''}`}
+                placeholder="Choose a username"
+                disabled={loading}
+                autoComplete="username"
             />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-              tabIndex="-1"
-            >
-              <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-            </button>
+            {errors.username && (
+                <div className="form-error">{errors.username}</div>
+            )}
           </div>
-          {errors.confirmPassword && (
-            <div className="form-error">{errors.confirmPassword}</div>
-          )}
-        </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary btn-full-width btn-large"
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <LoadingSpinner size="small" />
-              Creating Account...
-            </>
-          ) : (
-            'Create Account'
-          )}
-        </button>
-      </form>
-    </div>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address *
+            </label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`form-input ${errors.email ? 'error' : ''}`}
+                placeholder="Enter your email address"
+                disabled={loading}
+                autoComplete="email"
+            />
+            {errors.email && (
+                <div className="form-error">{errors.email}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password *
+            </label>
+            <div className="password-input-wrapper">
+              <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`form-input ${errors.password ? 'error' : ''}`}
+                  placeholder="Create a password"
+                  disabled={loading}
+                  autoComplete="new-password"
+              />
+              <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex="-1"
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
+            </div>
+            {errors.password && (
+                <div className="form-error">{errors.password}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="form-label">
+              Confirm Password *
+            </label>
+            <div className="password-input-wrapper">
+              <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+                  placeholder="Confirm your password"
+                  disabled={loading}
+                  autoComplete="new-password"
+              />
+              <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  tabIndex="-1"
+              >
+                <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
+            </div>
+            {errors.confirmPassword && (
+                <div className="form-error">{errors.confirmPassword}</div>
+            )}
+          </div>
+
+          <button
+              type="submit"
+              className="btn btn-primary btn-full-width btn-large"
+              disabled={loading}
+          >
+            {loading ? (
+                <>
+                  <LoadingSpinner size="small" />
+                  Creating Account...
+                </>
+            ) : (
+                'Create Account'
+            )}
+          </button>
+        </form>
+      </div>
   );
 };
 

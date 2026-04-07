@@ -6,9 +6,13 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import Modal from '../Common/Modal';
 import './EmailGenerator.css';
 
-const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegenerate, loading }) => {
+// onReplySaved was previously missing from this destructuring — the parent passes it
+// correctly but it was always undefined inside the component, so stats never refreshed
+// after saving. Fixed by adding it here.
+const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegenerate, loading, onReplySaved }) => {
   const { showSuccess, showError } = useNotification();
   const [savingIndex, setSavingIndex] = useState(null);
+  const [savedIndices, setSavedIndices] = useState(new Set()); // track which replies have been saved
   const [expandedReply, setExpandedReply] = useState(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
 
@@ -21,15 +25,9 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
     }
   };
 
-  const openSummaryModal = () => {
-    setShowSummaryModal(true);
-  };
+  const openSummaryModal = () => setShowSummaryModal(true);
+  const closeSummaryModal = () => setShowSummaryModal(false);
 
-  const closeSummaryModal = () => {
-    setShowSummaryModal(false);
-  };
-
-  // Helper function to truncate text
   const truncateText = (text, maxLength = 150) => {
     if (!text || text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
@@ -45,6 +43,12 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
   };
 
   const handleSaveReply = async (reply, index) => {
+    // Prevent saving the same reply again
+    if (savedIndices.has(index)) {
+      showSuccess('This reply is already saved.');
+      return;
+    }
+
     setSavingIndex(index);
     try {
       await replyService.saveReply({
@@ -55,9 +59,12 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
         replyText: reply,
         summary: replies.summary
       });
+
+      // Mark this index as saved
+      setSavedIndices(prev => new Set([...prev, index]));
       showSuccess(`Reply ${index + 1} saved successfully!`);
 
-      // Trigger stats refresh
+      // Trigger sidebar stats refresh — this was always undefined before the fix
       if (onReplySaved) {
         onReplySaved();
       }
@@ -68,217 +75,224 @@ const EmailReplies = ({ replies, originalEmail, onRegenerate, onClear, canRegene
     }
   };
 
-  const handleExpandReply = (reply, index) => {
-    setExpandedReply({ reply, index });
-  };
-
-  const closeExpandedReply = () => {
-    setExpandedReply(null);
-  };
+  const handleExpandReply = (reply, index) => setExpandedReply({ reply, index });
+  const closeExpandedReply = () => setExpandedReply(null);
 
   if (!replies) return null;
 
-
   return (
-    <div className="email-replies">
-      {/* Email Summary Section */}
-      {replies.summary && (
-        <div className="reply-card summary-card fade-in">
-          <div className="reply-header">
-            <h3 className="reply-number">
-              <i className="fas fa-file-alt"></i>
-              Email Summary
-            </h3>
-            <div className="reply-actions">
-              <button
-                onClick={handleCopySummary}
-                className="action-btn"
-                title="Copy summary to clipboard"
-              >
-                <i className="fas fa-copy"></i>
-              </button>
-              {replies.summary && replies.summary.length > 200 && (
-                <button
-                  onClick={openSummaryModal}
-                  className="action-btn"
-                  title="View full summary"
-                >
-                  <i className="fas fa-expand"></i>
-                </button>
+      <div className="email-replies">
+        {/* Email Summary Section */}
+        {replies.summary && (
+            <div className="reply-card summary-card fade-in">
+              <div className="reply-header">
+                <h3 className="reply-number">
+                  <i className="fas fa-file-alt"></i>
+                  Email Summary
+                </h3>
+                <div className="reply-actions">
+                  <button
+                      onClick={handleCopySummary}
+                      className="action-btn"
+                      title="Copy summary to clipboard"
+                  >
+                    <i className="fas fa-copy"></i>
+                  </button>
+                  {replies.summary && replies.summary.length > 200 && (
+                      <button
+                          onClick={openSummaryModal}
+                          className="action-btn"
+                          title="View full summary"
+                      >
+                        <i className="fas fa-expand"></i>
+                      </button>
+                  )}
+                </div>
+              </div>
+              <div className="reply-content">
+                <p className="reply-text">
+                  {truncateText(replies.summary, 200)}
+                </p>
+              </div>
+              {replies.summary && replies.summary.length > 180 && (
+                  <div className="reply-footer">
+                    <button
+                        onClick={openSummaryModal}
+                        className="btn btn-outline btn-small"
+                    >
+                      Read More
+                    </button>
+                  </div>
               )}
             </div>
+        )}
+
+        {/* Generated Replies Header */}
+        <div className="replies-header">
+          <div className="replies-title-section">
+            <h2 className="replies-title">
+              <i className="fas fa-reply-all"></i>
+              Generated Replies
+            </h2>
           </div>
-          <div className="reply-content">
-            <p className="reply-text">
-              {truncateText(replies.summary, 200)}
-            </p>
-          </div>
-          {replies.summary && replies.summary.length > 180 && (
-            <div className="reply-footer">
-              <button
-                onClick={openSummaryModal}
-                className="btn btn-outline btn-small"
-              >
-                Read More
-              </button>
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* Generated Replies Section */}
-      <div className="replies-header">
-        <div className="replies-title-section">
-          <h2 className="replies-title">
-            <i className="fas fa-reply-all"></i>
-            Generated Replies
-          </h2>
-        </div>
-
-        <div className="replies-actions">
-          <button
-            onClick={onRegenerate}
-            className="btn btn-outline"
-            disabled={!canRegenerate || loading}
-          >
-            {loading ? (
-              <>
-                <LoadingSpinner size="small" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-sync-alt"></i>
-                Regenerate
-              </>
-            )}
-          </button>
-          <button
-            onClick={onClear}
-            className="btn btn-secondary"
-            disabled={loading}
-          >
-            <i className="fas fa-times"></i>
-            Clear
-          </button>
-        </div>
-      </div>
-
-      <div className="replies-grid">
-        {replies.replies && replies.replies.map((reply, index) => (
-          <div key={index} className="reply-card">
-            <div className="reply-header">
-              <h3 className="reply-number">
-                <i className="fas fa-comment-alt"></i>
-                Reply Option {index + 1}
-              </h3>
-              <div className="reply-actions">
-                <button
-                  onClick={() => handleCopyReply(reply, index)}
-                  className="action-btn"
-                  title="Copy to clipboard"
-                >
-                  <i className="fas fa-copy"></i>
-                </button>
-                <button
-                  onClick={() => handleSaveReply(reply, index)}
-                  className="action-btn"
-                  disabled={savingIndex === index}
-                  title="Save reply"
-                >
-                  {savingIndex === index ? (
-                    <i className="fas fa-spinner fa-spin"></i>
-                  ) : (
-                    <i className="fas fa-bookmark"></i>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleExpandReply(reply, index)}
-                  className="action-btn"
-                  title="View full reply"
-                >
-                  <i className="fas fa-expand"></i>
-                </button>
-              </div>
-            </div>
-
-            <div className="reply-content">
-              <p className="reply-text">{reply}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Expanded Reply Modal */}
-      {expandedReply && (
-        <Modal
-          isOpen={true}
-          onClose={closeExpandedReply}
-          title={`Reply Option ${expandedReply.index + 1} - Full View`}
-          size="large"
-        >
-          <div className="expanded-reply">
-            <div className="expanded-reply-content">
-              <p className="expanded-reply-text">{expandedReply.reply}</p>
-            </div>
-            
-            <div className="expanded-reply-actions">
-              <button
-                onClick={() => handleCopyReply(expandedReply.reply, expandedReply.index)}
+          <div className="replies-actions">
+            <button
+                onClick={onRegenerate}
                 className="btn btn-outline"
-              >
-                <i className="fas fa-copy"></i>
-                Copy to Clipboard
-              </button>
-              
-              <button
-                onClick={() => handleSaveReply(expandedReply.reply, expandedReply.index)}
-                className="btn btn-primary"
-                disabled={savingIndex === expandedReply.index}
-              >
-                {savingIndex === expandedReply.index ? (
+                disabled={!canRegenerate || loading}
+            >
+              {loading ? (
                   <>
                     <LoadingSpinner size="small" />
-                    Saving...
+                    Generating...
                   </>
-                ) : (
+              ) : (
                   <>
-                    <i className="fas fa-bookmark"></i>
-                    Save Reply
+                    <i className="fas fa-sync-alt"></i>
+                    Regenerate
                   </>
-                )}
-              </button>
-            </div>
+              )}
+            </button>
+            <button
+                onClick={onClear}
+                className="btn btn-secondary"
+                disabled={loading}
+            >
+              <i className="fas fa-times"></i>
+              Clear
+            </button>
           </div>
-        </Modal>
-      )}
+        </div>
 
-      {/* Summary Modal */}
-      {showSummaryModal && (
-        <Modal
-          isOpen={true}
-          onClose={closeSummaryModal}
-          title="Email Summary - Full View"
-          size="large"
-        >
-          <div className="expanded-reply">
-            <div className="expanded-reply-content">
-              <p className="expanded-reply-text">{replies.summary}</p>
-            </div>
+        {/* Reply Cards */}
+        <div className="replies-grid">
+          {replies.replies && replies.replies.map((reply, index) => {
+            const isSaved = savedIndices.has(index);
+            return (
+                <div key={index} className="reply-card">
+                  <div className="reply-header">
+                    <h3 className="reply-number">
+                      <i className="fas fa-comment-alt"></i>
+                      Reply Option {index + 1}
+                    </h3>
+                    <div className="reply-actions">
+                      <button
+                          onClick={() => handleCopyReply(reply, index)}
+                          className="action-btn"
+                          title="Copy to clipboard"
+                      >
+                        <i className="fas fa-copy"></i>
+                      </button>
+                      <button
+                          onClick={() => handleSaveReply(reply, index)}
+                          className={`action-btn ${isSaved ? 'saved' : ''}`}
+                          disabled={savingIndex === index}
+                          title={isSaved ? 'Already saved' : 'Save reply'}
+                          style={isSaved ? { color: 'var(--color-success, #22c55e)' } : {}}
+                      >
+                        {savingIndex === index ? (
+                            <i className="fas fa-spinner fa-spin"></i>
+                        ) : (
+                            <i className={`fas ${isSaved ? 'fa-check' : 'fa-bookmark'}`}></i>
+                        )}
+                      </button>
+                      <button
+                          onClick={() => handleExpandReply(reply, index)}
+                          className="action-btn"
+                          title="View full reply"
+                      >
+                        <i className="fas fa-expand"></i>
+                      </button>
+                    </div>
+                  </div>
 
-            <div className="expanded-reply-actions">
-              <button
-                onClick={handleCopySummary}
-                className="btn btn-outline"
-              >
-                <i className="fas fa-copy"></i>
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-    </div>
+                  <div className="reply-content">
+                    <p className="reply-text">{reply}</p>
+                  </div>
+
+                  {isSaved && (
+                      <div style={{ padding: '4px 0 0', fontSize: '11px', color: 'var(--color-success, #22c55e)' }}>
+                        <i className="fas fa-check-circle"></i> Saved
+                      </div>
+                  )}
+                </div>
+            );
+          })}
+        </div>
+
+        {/* Expanded Reply Modal */}
+        {expandedReply && (
+            <Modal
+                isOpen={true}
+                onClose={closeExpandedReply}
+                title={`Reply Option ${expandedReply.index + 1} - Full View`}
+                size="large"
+            >
+              <div className="expanded-reply">
+                <div className="expanded-reply-content">
+                  <p className="expanded-reply-text">{expandedReply.reply}</p>
+                </div>
+                <div className="expanded-reply-actions">
+                  <button
+                      onClick={() => handleCopyReply(expandedReply.reply, expandedReply.index)}
+                      className="btn btn-outline"
+                  >
+                    <i className="fas fa-copy"></i>
+                    Copy to Clipboard
+                  </button>
+                  <button
+                      onClick={() => handleSaveReply(expandedReply.reply, expandedReply.index)}
+                      className="btn btn-primary"
+                      disabled={savingIndex === expandedReply.index || savedIndices.has(expandedReply.index)}
+                  >
+                    {savingIndex === expandedReply.index ? (
+                        <>
+                          <LoadingSpinner size="small" />
+                          Saving...
+                        </>
+                    ) : savedIndices.has(expandedReply.index) ? (
+                        <>
+                          <i className="fas fa-check"></i>
+                          Saved
+                        </>
+                    ) : (
+                        <>
+                          <i className="fas fa-bookmark"></i>
+                          Save Reply
+                        </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </Modal>
+        )}
+
+        {/* Summary Modal */}
+        {showSummaryModal && (
+            <Modal
+                isOpen={true}
+                onClose={closeSummaryModal}
+                title="Email Summary - Full View"
+                size="large"
+            >
+              <div className="expanded-reply">
+                <div className="expanded-reply-content">
+                  <p className="expanded-reply-text">{replies.summary}</p>
+                </div>
+                <div className="expanded-reply-actions">
+                  <button
+                      onClick={handleCopySummary}
+                      className="btn btn-outline"
+                  >
+                    <i className="fas fa-copy"></i>
+                    Copy to Clipboard
+                  </button>
+                </div>
+              </div>
+            </Modal>
+        )}
+      </div>
   );
 };
 

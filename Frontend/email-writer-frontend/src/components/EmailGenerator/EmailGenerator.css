@@ -1,69 +1,14 @@
-/* EmailGenerator.css - Cleaned Version */
+/* EmailGenerator.css */
+/*
+  The :root block that was here has been removed.
+  It was redefining --primary-color, --bg-primary, --text-primary, etc.
+  with hardcoded light-only hex values (Google blue #4285f4, white #ffffff).
+  Since :root has the same specificity everywhere, these definitions were
+  winning over the dark-mode overrides in index.css, making the entire
+  EmailGenerator page ignore dark mode.
 
-/* === CSS Variables === */
-:root {
-  /* Colors */
-  --primary-color: #4285f4;
-  --primary-hover: #3367d6;
-  --primary-light: #8ab4f8;
-  --secondary-color: #34a853;
-  --error-color: #ea4335;
-  --warning-color: #fbbc05;
-  --info-color: #4285f4;
-  --success-color: #34a853;
-  --dark-color: #202124;
-  --light-color: #f8f9fa;
-  --muted-color: #5f6368;
-  
-  /* Backgrounds */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-muted: #e8f0fe;
-  --bg-dark: #202124;
-  
-  /* Text Colors */
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --text-light: #ffffff;
-  --text-muted: #9aa0a6;
-  
-  /* Font Sizes */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  
-  /* Borders */
-  --border-color: #dadce0;
-  --border-light: #e8eaed;
-  --border-dark: #5f6368;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.3);
-  --shadow-md: 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-  --shadow-lg: 0 4px 8px 3px rgba(60, 64, 67, 0.15);
-  
-  /* Transitions */
-  --transition-fast: 0.2s ease;
-  --transition-smooth: 0.3s ease;
-}
+  All colors now come from the global CSS variables in index.css.
+*/
 
 /* === Email Generator Container === */
 .email-generator {
@@ -80,6 +25,13 @@
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-primary) 100%);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
+}
+
+/* Dark mode: primary-light becomes dark navy — gradient invisible.
+   Override with a subtle border + muted background instead. */
+[data-theme="dark"] .generator-header {
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
 }
 
 .generator-title {
@@ -250,7 +202,7 @@
 
 .btn-primary {
   background: var(--primary-color);
-  color: var(--text-light);
+  color: var(--text-white);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -284,7 +236,7 @@
 
 .btn-outline:hover:not(:disabled) {
   background: var(--primary-color);
-  color: var(--text-light);
+  color: var(--text-white);
   transform: translateY(-1px);
 }
 
@@ -428,16 +380,18 @@
   color: var(--text-primary);
 }
 
+/* === Summary Section ===
+   Previously used hardcoded linear-gradient(135deg, #e3f2fd, #f8f9fa) —
+   invisible in dark mode. Now uses theme-aware CSS variables. */
 .email-summary-section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
-  background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
+  background: var(--bg-muted);
   border-radius: var(--radius-lg);
   border: 2px solid var(--primary-color);
   margin-bottom: var(--spacing-xl);
-  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.1);
 }
 
 .email-summary-section i {
@@ -455,18 +409,58 @@
   margin: 0;
 }
 
-/* Enhanced Summary Content */
+/* === Summary Card ===
+   Previously had hardcoded linear-gradient(135deg, #e3f2fd, #f8f9fa) !important
+   — near-invisible in dark mode. Now uses var(--bg-muted) which adapts. */
+.summary-card {
+  background: var(--bg-muted) !important;
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  margin-bottom: var(--spacing-xl);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.summary-card:hover {
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--primary-hover) !important;
+  transform: translateY(-2px);
+}
+
+.summary-card .reply-number {
+  color: var(--primary-color);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.summary-card .reply-text {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.summary-card .action-btn {
+  background: var(--bg-primary);
+  color: var(--primary-color);
+}
+
+.summary-card .action-btn:hover {
+  background: var(--primary-color);
+  color: var(--text-white);
+}
+
+/* === Summary Content === */
 .summary-content {
   font-size: var(--font-size-base);
   color: var(--text-primary);
   line-height: 1.6;
   margin: 0;
   padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-primary); /* was rgba(255,255,255,0.8) — invisible in dark */
   border-radius: var(--radius-md);
   border-left: 3px solid var(--primary-color);
   font-weight: 400;
-  /* Remove any text truncation */
   display: block;
   overflow: visible;
   max-height: none;
@@ -482,7 +476,6 @@
   overflow: visible;
   text-overflow: clip;
   display: block;
-  /* Ensure no line clamping */
   -webkit-line-clamp: unset;
   line-clamp: unset;
   -webkit-box-orient: unset;
@@ -513,7 +506,7 @@
 
 .summary-copy-btn {
   background: var(--primary-color);
-  color: var(--text-light);
+  color: var(--text-white);
   border: none;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
@@ -534,7 +527,7 @@
 .summary-copy-btn:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .summary-copy-btn i {
@@ -556,7 +549,7 @@
 
 .read-more-btn:hover {
   background: var(--primary-color) !important;
-  color: var(--text-light) !important;
+  color: var(--text-white) !important;
   transform: translateY(-1px);
 }
 
@@ -568,13 +561,13 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all var(--transition-smooth);
+  transition: all var(--transition-normal);
 }
 
 .summary-text-expanded {
   display: block;
   overflow: visible;
-  transition: all var(--transition-smooth);
+  transition: all var(--transition-normal);
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -582,48 +575,6 @@
   display: flex;
   gap: var(--spacing-sm);
 }
-
-/* === Summary Card === */
-.summary-card {
-  background: linear-gradient(135deg, #e3f2fd, #f8f9fa) !important;
-  border: 2px solid var(--primary-color) !important;
-  box-shadow: 0 2px 12px rgba(66, 133, 244, 0.15) !important;
-  margin-bottom: var(--spacing-xl);
-  /* Same animations as reply cards */
-  transition: all var(--transition-fast);
-  position: relative;
-}
-
-.summary-card:hover {
-  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.25) !important;
-  border-color: var(--primary-hover) !important;
-  transform: translateY(-2px);
-}
-
-.summary-card .reply-number {
-  color: var(--primary-color);
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-}
-
-.summary-card .reply-text {
-  font-size: var(--font-size-base);
-  font-weight: 400;
-  color: var(--text-primary);
-  /* Same line-clamp behavior as reply cards */
-  line-height: 1.6;
-}
-
-.summary-card .action-btn {
-  background: rgba(66, 133, 244, 0.1);
-  color: var(--primary-color);
-}
-
-.summary-card .action-btn:hover {
-  background: var(--primary-color);
-  color: white;
-}
-
 
 /* === Replies Grid === */
 .replies-grid {
@@ -732,34 +683,18 @@
 
 /* === Animations === */
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.slide-in {
-  animation: slideIn 0.3s ease-out;
-}
+.slide-in { animation: slideIn 0.3s ease-out; }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
+.fade-in { animation: fadeIn 0.5s ease-out; }
 
 /* === Responsive Design === */
 @media (max-width: 768px) {
@@ -767,71 +702,47 @@
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
   }
-  
-  .generator-title {
-    font-size: var(--font-size-2xl);
-  }
-  
-  .generator-description {
-    font-size: var(--font-size-base);
-  }
-  
-  .email-form-container {
-    padding: var(--spacing-lg);
-  }
-  
+
+  .generator-title { font-size: var(--font-size-2xl); }
+  .generator-description { font-size: var(--font-size-base); }
+  .email-form-container { padding: var(--spacing-lg); }
+
   .form-row {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
+
   .form-actions {
     flex-direction: column-reverse;
     gap: var(--spacing-sm);
   }
-  
-  .form-actions .btn {
-    width: 100%;
-  }
-  
+
+  .form-actions .btn { width: 100%; }
+
   .replies-header {
     flex-direction: column;
     gap: var(--spacing-md);
     align-items: flex-start;
   }
-  
+
   .replies-actions {
     width: 100%;
     justify-content: flex-end;
   }
-  
+
   .replies-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
-  .placeholder-features {
-    grid-template-columns: 1fr;
-  }
+
+  .placeholder-features { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
-  .generator-header {
-    padding: var(--spacing-md);
-  }
-  
-  .email-form-container {
-    padding: var(--spacing-md);
-  }
-  
-  .email-replies {
-    padding: var(--spacing-md);
-  }
-  
-  .reply-card {
-    padding: var(--spacing-md);
-  }
-  
+  .generator-header { padding: var(--spacing-md); }
+  .email-form-container { padding: var(--spacing-md); }
+  .email-replies { padding: var(--spacing-md); }
+  .reply-card { padding: var(--spacing-md); }
   .replies-actions {
     flex-direction: column;
     width: 100%;

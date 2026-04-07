@@ -17,20 +17,14 @@ const EmailGenerator = ({ onReplyGenerated }) => {
     setLoading(true);
     setColdStart(false);
 
-    // Show cold start message after 7 seconds
-    const coldStartTimer = setTimeout(() => {
-      setColdStart(true);
-    }, 7000);
+    const coldStartTimer = setTimeout(() => setColdStart(true), 7000);
 
     try {
       const response = await emailService.generateReplies(emailData);
       setReplies(response);
       setLastRequest(emailData);
       showSuccess('Email replies generated successfully!');
-      // Trigger stats refresh when new replies are generated
-      if (onReplyGenerated) {
-        onReplyGenerated();
-      }
+      if (onReplyGenerated) onReplyGenerated();
     } catch (error) {
       showError(error.message);
       setReplies(null);
@@ -43,20 +37,25 @@ const EmailGenerator = ({ onReplyGenerated }) => {
 
   const handleRegenerateReplies = async () => {
     if (!lastRequest) return;
-    
+
     setLoading(true);
+    setColdStart(false);
+
+    // Cold start timer was missing here — regenerate could hang 15-30s on
+    // Render free tier with no explanation shown to the user (issue N4).
+    const coldStartTimer = setTimeout(() => setColdStart(true), 7000);
+
     try {
       const response = await emailService.regenerateReplies(lastRequest);
       setReplies(response);
       showSuccess('New reply variations generated!');
-      // Trigger stats refresh when replies are regenerated
-      if (onReplyGenerated) {
-        onReplyGenerated();
-      }
+      if (onReplyGenerated) onReplyGenerated();
     } catch (error) {
       showError(error.message);
     } finally {
+      clearTimeout(coldStartTimer);
       setLoading(false);
+      setColdStart(false);
     }
   };
 
@@ -66,87 +65,84 @@ const EmailGenerator = ({ onReplyGenerated }) => {
   };
 
   return (
-    <div className="email-generator">
-      <div className="generator-header">
-        <h1 className="generator-title">
-          <i className="fas fa-magic"></i>
-          Email Generator
-        </h1>
-        <p className="generator-description">
-          Generate AI-powered email replies with different tones and styles. 
-          Simply paste the original email and let our AI create professional responses for you.
-        </p>
-      </div>
-
-      <div className="generator-content">
-        <div className="generator-form-section">
-          <EmailForm 
-            onGenerate={handleGenerateReplies}
-            loading={loading}
-          />
+      <div className="email-generator">
+        <div className="generator-header">
+          <h1 className="generator-title">
+            <i className="fas fa-magic"></i>
+            Email Generator
+          </h1>
+          <p className="generator-description">
+            Generate AI-powered email replies with different tones and styles.
+            Simply paste the original email and let our AI create professional responses for you.
+          </p>
         </div>
 
-        {loading && (
-          <div className="generator-loading">
-            <LoadingSpinner size="large" text="Generating email replies..." />
-            <p className="loading-message">
-              Our AI is crafting personalized responses for you. This may take a few moments.
-            </p>
-            {coldStart && (
-              <div className="cold-start-message">
-                <i className="fas fa-clock"></i>
-                <span>Waking up the server… This may take a few seconds.</span>
-              </div>
-            )}
+        <div className="generator-content">
+          <div className="generator-form-section">
+            <EmailForm onGenerate={handleGenerateReplies} loading={loading} />
           </div>
-        )}
 
-        {replies && !loading && (
-          <div className="generator-results-section">
-            <EmailReplies
-              replies={replies}
-              originalEmail={lastRequest}
-              onRegenerate={handleRegenerateReplies}
-              onClear={handleClearReplies}
-              canRegenerate={!!lastRequest}
-              loading={loading}
-              onReplySaved={onReplyGenerated}
-            />
-          </div>
-        )}
+          {loading && (
+              <div className="generator-loading">
+                <LoadingSpinner size="large" text="Generating email replies..." />
+                <p className="loading-message">
+                  Our AI is crafting personalized responses for you. This may take a few moments.
+                </p>
+                {coldStart && (
+                    <div className="cold-start-message">
+                      <i className="fas fa-clock"></i>
+                      <span>Waking up the server… This may take a few seconds.</span>
+                    </div>
+                )}
+              </div>
+          )}
 
-        {!replies && !loading && (
-          <div className="generator-placeholder">
-            <div className="placeholder-content">
-              <i className="fas fa-envelope-open-text placeholder-icon"></i>
-              <h3>Ready to Generate Email Replies</h3>
-              <p>
-                Fill out the form above to get started. Our AI will analyze the email content 
-                and generate multiple professional reply options for you to choose from.
-              </p>
-              <div className="placeholder-features">
-                <div className="feature-item">
-                  <i className="fas fa-check-circle"></i>
-                  <span>Multiple reply variations</span>
-                </div>
-                <div className="feature-item">
-                  <i className="fas fa-check-circle"></i>
-                  <span>Customizable tone and style</span>
-                </div>
-                <div className="feature-item">
-                  <i className="fas fa-check-circle"></i>
-                  <span>Multi-language support</span>
-                </div>
-                <div className="feature-item">
-                  <i className="fas fa-check-circle"></i>
-                  <span>Save your favorites</span>
+          {replies && !loading && (
+              <div className="generator-results-section">
+                <EmailReplies
+                    replies={replies}
+                    originalEmail={lastRequest}
+                    onRegenerate={handleRegenerateReplies}
+                    onClear={handleClearReplies}
+                    canRegenerate={!!lastRequest}
+                    loading={loading}
+                    onReplySaved={onReplyGenerated}
+                />
+              </div>
+          )}
+
+          {!replies && !loading && (
+              <div className="generator-placeholder">
+                <div className="placeholder-content">
+                  <i className="fas fa-envelope-open-text placeholder-icon"></i>
+                  <h3>Ready to Generate Email Replies</h3>
+                  <p>
+                    Fill out the form above to get started. Our AI will analyze the email content
+                    and generate multiple professional reply options for you to choose from.
+                  </p>
+                  <div className="placeholder-features">
+                    <div className="feature-item">
+                      <i className="fas fa-check-circle"></i>
+                      <span>Multiple reply variations</span>
+                    </div>
+                    <div className="feature-item">
+                      <i className="fas fa-check-circle"></i>
+                      <span>Customizable tone and style</span>
+                    </div>
+                    <div className="feature-item">
+                      <i className="fas fa-check-circle"></i>
+                      <span>Multi-language support</span>
+                    </div>
+                    <div className="feature-item">
+                      <i className="fas fa-check-circle"></i>
+                      <span>Save your favorites</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
   );
 };
 
