@@ -1,75 +1,63 @@
 // API Configuration
 const getApiBaseUrl = () => {
-  // First priority: environment variable
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
-  // Second priority: detect environment
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:8081';
   } else if (hostname.includes('staging')) {
-    // Optionally handle staging, fallback to env if not set
     return '';
   } else {
-    // Fallback: leave blank, user must set env for production
     return '';
   }
 };
 export const API_BASE_URL = getApiBaseUrl();
 
-// API Endpoints
+// API Endpoints — versioned at /api/v1
 export const API_ENDPOINTS = {
-  // Authentication
   AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    TEST: '/api/auth/test'
+    LOGIN:    '/api/v1/auth/login',
+    REGISTER: '/api/v1/auth/register',
+    TEST:     '/api/v1/auth/test'
   },
-  
-  // Email Generation
   EMAIL: {
-    GENERATE: '/api/email/generate',
-    REGENERATE: '/api/email/regenerate',
-    GENERATE_SINGLE: '/api/email/generate-single',
-    TEST: '/api/email/test'
+    GENERATE:        '/api/v1/email/generate',
+    REGENERATE:      '/api/v1/email/regenerate',
+    GENERATE_SINGLE: '/api/v1/email/generate-single',
+    TEST:            '/api/v1/email/test',
+    PING:            '/api/v1/email/ping'
   },
-  
-  // Saved Replies
   REPLIES: {
-    SAVE: '/api/replies/save',
-    HISTORY: '/api/replies/history',
-    SEARCH: '/api/replies/search',
-    FAVORITES: '/api/replies/favorites',
-    FAVORITE: '/api/replies/{id}/favorite',
-    DELETE: '/api/replies/{id}',
-    STATS: '/api/replies/stats',
-    EXPORT: '/api/replies/export'
+    SAVE:      '/api/v1/replies/save',
+    HISTORY:   '/api/v1/replies/history',
+    SEARCH:    '/api/v1/replies/search',
+    FAVORITES: '/api/v1/replies/favorites',
+    FAVORITE:  '/api/v1/replies/{id}/favorite',
+    DELETE:    '/api/v1/replies/{id}',
+    STATS:     '/api/v1/replies/stats',
+    EXPORT:    '/api/v1/replies/export'
   }
 };
 
-// Application Constants
 export const APP_NAME = 'Smart Email Assistant';
 
-// Notification Types
 export const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
-  ERROR: 'error',
+  ERROR:   'error',
   WARNING: 'warning',
-  INFO: 'info'
+  INFO:    'info'
 };
 
-// Email Tone Options
 export const EMAIL_TONES = [
   { value: 'professional', label: 'Professional' },
-  { value: 'casual', label: 'Casual' },
-  { value: 'friendly', label: 'Friendly' },
-  { value: 'formal', label: 'Formal' },
-  { value: 'concise', label: 'Concise' },
-  { value: 'detailed', label: 'Detailed' }
+  { value: 'casual',       label: 'Casual' },
+  { value: 'friendly',     label: 'Friendly' },
+  { value: 'formal',       label: 'Formal' },
+  { value: 'concise',      label: 'Concise' },
+  { value: 'detailed',     label: 'Detailed' }
 ];
 
-// Language Options
 export const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Spanish' },
@@ -78,39 +66,28 @@ export const LANGUAGE_OPTIONS = [
   { value: 'hi', label: 'Hindi' }
 ];
 
-// Pagination
-export const DEFAULT_PAGE_SIZE = 20;
-export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+export const DEFAULT_PAGE_SIZE  = 20;
+export const PAGE_SIZE_OPTIONS  = [10, 20, 50, 100];
 
-// Local Storage Keys
 export const STORAGE_KEYS = {
-  TOKEN: 'email_writer_token',
-  USER: 'email_writer_user',
+  TOKEN:       'email_writer_token',
+  USER:        'email_writer_user',
   PREFERENCES: 'email_writer_preferences'
 };
 
-// Validation Rules
 export const VALIDATION_RULES = {
   USERNAME: {
     MIN_LENGTH: 3,
     MAX_LENGTH: 50,
     PATTERN: /^[a-zA-Z0-9_]+$/
   },
-  PASSWORD: {
-    MIN_LENGTH: 6
-  },
-  EMAIL: {
-    PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  }
+  PASSWORD: { MIN_LENGTH: 6 },
+  EMAIL:    { PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
 };
 
-// UI Constants
-export const DEBOUNCE_DELAY = 500;
+export const DEBOUNCE_DELAY     = 500;
 export const ANIMATION_DURATION = 300;
-export const TOAST_DURATION = 5000;
+export const TOAST_DURATION     = 5000;
 
-// File Export
-export const EXPORT_FORMATS = {
-  CSV: 'csv',
-  JSON: 'json'
-};
+// Only CSV export is supported — backend has no JSON export endpoint
+export const EXPORT_FORMATS = { CSV: 'csv' };
