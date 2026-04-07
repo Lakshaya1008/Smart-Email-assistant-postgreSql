@@ -5,9 +5,12 @@ FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
 # Copy Maven wrapper + pom.xml
-COPY Backend/email-writer-backend/mvnw .
-COPY Backend/email-writer-backend/.mvn .mvn
-COPY Backend/email-writer-backend/pom.xml .
+# Paths are relative to the Docker Build Context Directory configured in Render:
+#   Backend/email-writer-backend/
+# So these paths are relative to that directory, not the repo root.
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
 # Fix permissions for mvnw
 RUN chmod +x mvnw
@@ -16,7 +19,7 @@ RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
 
 # Copy project source
-COPY Backend/email-writer-backend/src ./src
+COPY src ./src
 
 # Package application (skip tests for faster builds)
 RUN ./mvnw clean package -DskipTests
@@ -30,8 +33,8 @@ WORKDIR /app
 # Copy built JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Render/Heroku set $PORT dynamically. Spring Boot must bind to it:
-# Ensure you have `server.port=${PORT:8080}` in application.properties
+# Render sets $PORT dynamically. Spring Boot binds to it via:
+#   server.port=${PORT:8080}  in application.properties
 EXPOSE 8080
 
 # Run the app
